@@ -1,6 +1,9 @@
 import psycopg2
 from dotenv import load_dotenv
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #carrega as variaveis de ambiente do arquivo .env
 load_dotenv()
@@ -14,20 +17,18 @@ try:
         password=os.getenv("DB_PASSWORD"),
         port=os.getenv("DB_PORT")
     )  
+
+    logging.info("Conexão com o banco de dados estabelecida com sucesso.")
+
+    # Comandos para excecutar no banco de dados
+    cursor = conn.cursor()
+    cursor.execute("SELECT version();")
+    result = cursor.fetchone()
+    logging.info(f"Versão do banco de dados: {result}")
+
+    # Feche o cursor e a conexão
+    cursor.close()
+    conn.close()
+
 except Exception as e:
-    print(f"Erro ao conectar ao banco de dados: {e}")
-
-
-# Criação de um cursor para executar comandos SQL
-cursor = conn.cursor()
-
-# Execute uma consulta simples
-cursor.execute("SELECT version();")
-
-# Obtenha o resultado
-result = cursor.fetchone()
-print(f"Conexão bem-sucedida: {result}")
-
-# Feche o cursor e a conexão
-cursor.close()
-conn.close()
+    logging.error(f"Erro ao conectar ao banco de dados: {e}", exc_info=True)
