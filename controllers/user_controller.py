@@ -20,3 +20,25 @@ class UserController:
             self.conn.rollback()
             cursor.close()
             return False, "Erro ao criar usuário."
+        finally:
+            cursor.close()
+            self.conn.close()
+            logging.info("Conexão com o banco de dados fechada.")
+        
+    def get_user_by_email(self, user_email: str):
+        try:
+            cursor = self.conn.cursor()
+            query = "SELECT * FROM user_financial WHERE user_email = %s"
+            cursor.execute(query, (user_email,))
+            user = cursor.fetchone()
+            cursor.close()
+            logging.info("Usuário encontrado com sucesso.")
+            return True, "Usuário encontrado com sucesso."
+        except Exception as e:
+            logging.error("Erro ao encontrar usuário: %s", e)
+            cursor.close()
+            return False, "Erro ao encontrar usuário."
+        finally: 
+            cursor.close()
+            self.conn.close()
+            logging.info("Conexão com o banco de dados fechada.")
