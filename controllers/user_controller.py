@@ -1,3 +1,4 @@
+import logging
 from models.user import User
 
 class UserController:
@@ -12,7 +13,10 @@ class UserController:
             cursor.execute(query, (user.name, user.email, user.password))
             self.conn.commit()
             cursor.close()
+            logging.info("Usuário criado com sucesso.")
+            return True, "Usuário criado com sucesso."
         except Exception as e:
-            print(f"Erro ao criar usuário: {e}")
+            logging.error("erro ao criar usuário: %s", e)
             self.conn.rollback()
             cursor.close()
+            return False, "Erro ao criar usuário."
