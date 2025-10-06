@@ -31,7 +31,6 @@ def register_page(page: ft.Page):
     # Botão de registrar
     btn_register = ft.ElevatedButton(
         text="Registrar",
-        icon=ft.Icons.PERSON_ADD,
         style=ft.ButtonStyle(
             bgcolor={"": "#44CFA1"},
             color={"": "white"},
@@ -42,15 +41,10 @@ def register_page(page: ft.Page):
     )
 
     # Botão de Voltar para Home
-    btn_backToHome = ft.ElevatedButton(
-        text="Voltar para Home",
+    btn_backToHome = ft.IconButton(
         icon=ft.Icons.HOME,
-        style=ft.ButtonStyle(
-            bgcolor={"": "#44CFA1"},
-            color={"": "white"},
-            padding=20,
-            shape=ft.RoundedRectangleBorder(radius=10),
-        ),
+        icon_color="white",
+        bgcolor="#44CFA1",
         on_click=backToHome_click
     )
 
@@ -61,6 +55,8 @@ def register_page(page: ft.Page):
         controls=[
             ft.Column(
                 controls=[  
+                    ft.Text("Registrar-se", theme_style="displayMedium", size=40, weight="bold", color="#44CFA1"),
+                    ft.Text("Preencha os campos abaixo para criar uma nova conta.", size=20),
                         txt_user, 
                         txt_email, 
                         txt_pass, 

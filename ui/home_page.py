@@ -25,7 +25,7 @@ def home_page(page: ft.Page):
     # Botão de Registrar (alternativo)
     btn_register = ft.ElevatedButton(
         text="Registrar",
-        icon=ft.Icons.APP_REGISTRATION,
+        icon=ft.Icons.PERSON_ADD,
         style=ft.ButtonStyle(
             bgcolor={"":"#44CFA1"},
             color={"":"white"},
