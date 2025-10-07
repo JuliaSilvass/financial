@@ -21,7 +21,7 @@ def register_page(page: ft.Page):
             # Aqui você chamaria o controller para criar o usuário no banco
             page.snack_bar = ft.SnackBar(ft.Text(f"Usuário {user} cadastrado com sucesso!"))
         page.snack_bar.open = True
-        page.update()
+        page.update() 
 
     #Função do botão de voltar para home
     def backToHome_click(e):

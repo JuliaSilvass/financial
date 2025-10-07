@@ -21,8 +21,16 @@ def login_page(page: ft.Page):
         page.go("/")
 
     # Botão de login
-    btn_login = ft.ElevatedButton("Login", on_click=login_click)
-
+    btn_login = ft.ElevatedButton(
+    text="Login",
+    style=ft.ButtonStyle(
+        bgcolor={"": "#44CFA1"},
+        color={"": "white"},
+        padding=20,
+        shape=ft.RoundedRectangleBorder(radius=10),
+    ),
+    on_click=login_click
+)
     # Botão de Voltar para Home
     btn_backToHome = ft.IconButton(
         icon=ft.Icons.HOME,
