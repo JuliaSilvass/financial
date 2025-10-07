@@ -1,45 +1,44 @@
 import logging
 from models.user import User
-from services.register_service import 
+from services.user_service import UserServices 
 
 class UserController:
-    def __init__(self, conn):
-        self.conn = conn
+    def __init__(self):
+        self.service = UserServices()
 
-    def create_user(self, user: User):
-
-        try:
-            cursor = self.conn.cursor()
-            query = "INSERT INTO user_financial (user_name, user_email, user_password_hash) VALUES (%s, %s, %s)"
-            cursor.execute(query, (user.name, user.email, user.password))
-            self.conn.commit()
-            cursor.close()
-            logging.info("Usuário criado com sucesso.")
-            return True, "Usuário criado com sucesso."
-        except Exception as e:
-            logging.error("erro ao criar usuário: %s", e)
-            self.conn.rollback()
-            cursor.close()
-            return False, "Erro ao criar usuário."
-        finally:
-            cursor.close()
-            self.conn.close()
-            logging.info("Conexão com o banco de dados fechada.")
+    def register_user(self, user, email, password):
         
-    def get_user_by_email(self, user_email: str):
-        try:
-            cursor = self.conn.cursor()
-            query = "SELECT * FROM user_financial WHERE user_email = %s"
-            cursor.execute(query, (user_email,))
-            user = cursor.fetchone()
-            cursor.close()
-            logging.info("Usuário encontrado com sucesso.")
-            return True, "Usuário encontrado com sucesso."
-        except Exception as e:
-            logging.error("Erro ao encontrar usuário: %s", e)
-            cursor.close()
-            return False, "Erro ao encontrar usuário."
-        finally: 
-            cursor.close()
-            self.conn.close()
-            logging.info("Conexão com o banco de dados fechada.")
+        # Verificar o tamanho da senha
+        if len (password) < 8:
+            return False, "A senha deve ter pelo menos 8 caracteres."
+        
+        # Verificar se o email já está cadastrado
+        # existing_user = self.service.get_user_by_email(user.email)
+        # if existing_user:   
+        #     return False, "Email já cadastrado."
+
+        #Cria usuário
+        user = self.service.create_user(user)
+        if user:
+            return True, "Usuário cadastrado com sucesso."
+        else:
+            return False, "Erro ao cadastrar usuário."
+        
+
+    # def get_user_by_email(self, user_email: str):
+    #     try:
+    #         cursor = self.conn.cursor()
+    #         query = "SELECT * FROM user_financial WHERE user_email = %s"
+    #         cursor.execute(query, (user_email,))
+    #         user = cursor.fetchone()
+    #         cursor.close()
+    #         logging.info("Usuário encontrado com sucesso.")
+    #         return True, "Usuário encontrado com sucesso."
+    #     except Exception as e:
+    #         logging.error("Erro ao encontrar usuário: %s", e)
+    #         cursor.close()
+    #         return False, "Erro ao encontrar usuário."
+    #     finally: 
+    #         cursor.close()
+    #         self.conn.close()
+    #         logging.info("Conexão com o banco de dados fechada.")

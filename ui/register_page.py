@@ -1,6 +1,9 @@
 import flet as ft
+from controllers.user_controller import UserController
 
 def register_page(page: ft.Page):
+
+    controller = UserController()
 
     # Campos de cadastro
     txt_user = ft.TextField(label="Nome", width=300)
@@ -18,8 +21,9 @@ def register_page(page: ft.Page):
         if password != password_confirm:
             page.snack_bar = ft.SnackBar(ft.Text("As senhas não coincidem!"))
         else:
-            # Aqui você chamaria o controller para criar o usuário no banco
-            page.snack_bar = ft.SnackBar(ft.Text(f"Usuário {user} cadastrado com sucesso!"))
+            success, message = controller.register_user(user, email, password)
+            page.snack_bar = ft.SnackBar(ft.Text(message))
+            
         page.snack_bar.open = True
         page.update() 
 
@@ -71,3 +75,5 @@ def register_page(page: ft.Page):
         horizontal_alignment="center",
         vertical_alignment="center"
     )
+
+
