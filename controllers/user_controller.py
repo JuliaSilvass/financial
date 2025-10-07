@@ -1,5 +1,6 @@
 import logging
 from models.user import User
+from services.register_service import 
 
 class UserController:
     def __init__(self, conn):
