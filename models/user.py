@@ -1,39 +1,37 @@
-#models/user.py
+# models/user.py
 
-class User:
-    def __init__(self, id=None, name=None, email=None, password=None):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.password = password
+from sqlalchemy import Column, Integer, String
+from database.connection_db import Base
+
+class User(Base):
+    __tablename__ = "usuario"  # nome exato da tabela no banco
+
+    usuario_id = Column(Integer, primary_key=True, index=True)
+    usuario_nome = Column(String, nullable=False)
+    usuario_email = Column(String, unique=True, index=True, nullable=False)
+    usuario_senha_hash = Column(String, nullable=False)
+
+    def __init__(self, nome=None, email=None, senha=None):
+        self.usuario_nome = nome
+        self.usuario_email = email
+        self.usuario_senha_hash = senha
 
     def __repr__(self):
-        return f"User(id={self.id}, name={self.name}, email={self.email})"
-    
-    #getters and setters
-    #nome
-    
-    @property
-    def get_name(self):
-        return self.name
+        return f"User(id={self.usuario_id}, nome={self.usuario_nome}, email={self.usuario_email})"
 
-    @get_name.setter   
-    def set_name(self, name):   
-        self.name = name
-    
+    # Getters e Setters opcionais (não são obrigatórios em Python)
     @property
-    def get_email(self):
-        return self.email
-    
-    @get_email.setter
-    def set_email(self, email):
-        self.email = email
+    def nome(self):
+        return self.usuario_nome
+
+    @nome.setter
+    def nome(self, valor):
+        self.usuario_nome = valor
 
     @property
-    def get_password(self):
-        return self.password    
-    
-    @get_password.setter
-    def set_password(self, password):
-        self._password = password    
-        
+    def email(self):
+        return self.usuario_email
+
+    @email.setter
+    def email(self, valor):
+        self.usuario_email = valor

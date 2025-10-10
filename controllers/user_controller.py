@@ -18,7 +18,7 @@ class UserController:
         #     return False, "Email já cadastrado."
 
         #Cria usuário
-        user = self.service.create_user(user)
+        user = self.service.create_user(user=user,email=email,password=password) 
         if user:
             return True, "Usuário cadastrado com sucesso."
         else:
