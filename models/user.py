@@ -11,10 +11,10 @@ class User(Base):
     usuario_email = Column(String, unique=True, index=True, nullable=False)
     usuario_senha_hash = Column(String, nullable=False)
 
-    def __init__(self, nome=None, email=None, senha=None):
+    def __init__(self, nome=None, email=None, password=None):
         self.usuario_nome = nome
         self.usuario_email = email
-        self.usuario_senha_hash = senha
+        self.usuario_senha_hash = password
 
     def __repr__(self):
         return f"User(id={self.usuario_id}, nome={self.usuario_nome}, email={self.usuario_email})"
