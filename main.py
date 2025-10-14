@@ -2,6 +2,7 @@ import flet as ft
 from ui.home_page import home_page  
 from ui.login_page import login_page
 from ui.register_page import register_page
+from ui.dashboard_page import dashboard_page
 from database.connection_db import test_connection
 from controllers.user_controller import UserController
 from utils.security import hash_password
@@ -28,6 +29,8 @@ if __name__ == "__main__":
                 page.views.append(login_page(page))
             elif page.route == "/register":
                 page.views.append(register_page(page))
+            elif page.route == "/dashboard":
+                page.views.append(dashboard_page(page))
             
             page.update()
 

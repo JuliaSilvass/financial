@@ -6,7 +6,11 @@ class SessionManager:
 
     @classmethod
     def login(cls, user):
-        cls._current_user = user
+        cls._current_user = {
+            "id": user.usuario_id,
+            "nome": user.usuario_nome,
+            "email": user.usuario_email
+        }
 
     @classmethod
     def logout(cls):
