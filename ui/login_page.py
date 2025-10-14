@@ -1,4 +1,8 @@
 import flet as ft
+from services.session_manager import SessionManager
+from controllers.user_controller import UserController
+
+userController = UserController()
 
 def login_page(page: ft.Page):
     
@@ -10,11 +14,12 @@ def login_page(page: ft.Page):
     def login_click(e):
         user = txt_email.value
         password = txt_pass.value
-        # Aqui você chama a função do controller para autenticar
-        print(f"Tentando login: {user} / {password}")
-        page.snack_bar = ft.SnackBar(ft.Text(f"Bem-vindo, {user}!"))
+        success, msg = userController.login_user(user, password)
+        page.snack_bar = ft.SnackBar(ft.Text(msg))
         page.snack_bar.open = True
         page.update()
+        if success:
+            page.go("/dashboard")
 
     #Função do botão de voltar para home
     def backToHome_click(e):

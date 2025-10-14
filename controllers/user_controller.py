@@ -1,6 +1,7 @@
 import logging
 from models.user import User
 from services.user_service import UserServices 
+from services.session_manager import SessionManager
 
 class UserController:
     def __init__(self):
@@ -25,20 +26,17 @@ class UserController:
             return False, "Erro ao cadastrar usuário."
         
 
-    # def get_user_by_email(self, user_email: str):
-    #     try:
-    #         cursor = self.conn.cursor()
-    #         query = "SELECT * FROM user_financial WHERE user_email = %s"
-    #         cursor.execute(query, (user_email,))
-    #         user = cursor.fetchone()
-    #         cursor.close()
-    #         logging.info("Usuário encontrado com sucesso.")
-    #         return True, "Usuário encontrado com sucesso."
-    #     except Exception as e:
-    #         logging.error("Erro ao encontrar usuário: %s", e)
-    #         cursor.close()
-    #         return False, "Erro ao encontrar usuário."
-    #     finally: 
-    #         cursor.close()
-    #         self.conn.close()
-    #         logging.info("Conexão com o banco de dados fechada.")
+    def login_user(self, email, password):
+        # Aqui chama service para buscar o usuário
+        user = self.service.get_user_by_email(email)
+        if not user:
+            return False, "Usuário não encontrado."
+        
+        if user.usuario_senha_hash != password:  
+            return False, "Senha incorreta."
+        
+        SessionManager.login(user)
+        return True, f"Bem-vindo, {user.nome}!"
+
+    def logout_user(self):
+        SessionManager.logout()

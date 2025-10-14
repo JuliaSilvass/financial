@@ -20,6 +20,7 @@ class User(Base):
         return f"User(id={self.usuario_id}, nome={self.usuario_nome}, email={self.usuario_email})"
 
     # Getters e Setters opcionais (não são obrigatórios em Python)
+    # TODO: Verificar se são necessários
     @property
     def nome(self):
         return self.usuario_nome
