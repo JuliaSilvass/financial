@@ -46,8 +46,7 @@ def dashboard_page(page: ft.Page):
                     # Barra lateral
                     ft.Column(
                         controls=[
-                            # ft.Text(f"Olá, {user.usuario_nome}", size=20, weight="bold"),
-                            ft.Text(f"Olá", size=20, weight="bold"),
+                            ft.Text(f"Olá, {user['nome']}", size=20, weight="bold"),
                             ft.Divider(height=2, thickness=1),
                             *menu_buttons,
                             ft.ElevatedButton("Logout", bgcolor="red", on_click=logout_click)
