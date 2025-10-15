@@ -13,14 +13,13 @@ def dashboard_page(page: ft.Page):
         SessionManager.logout()
         page.go("/")
 
-    # Função de navegação para cada área
+    # Função de navegação
     def navigate(area):
         page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
         page.snack_bar.open = True
         page.update()
-        # Aqui futuramente você chamaria page.go("/area") para abrir a view correspondente
 
-    # Menu lateral
+    # Itens do menu lateral
     menu_items = [
         "Ambientes Financeiros",
         "Receitas e Despesas",
@@ -32,8 +31,20 @@ def dashboard_page(page: ft.Page):
         "Configurações"
     ]
 
+    # Botões do menu
     menu_buttons = [
-        ft.ElevatedButton(text=item, on_click=lambda e, a=item: navigate(a), expand=True)
+        ft.ElevatedButton(
+            text=item,
+            on_click=lambda e, a=item: navigate(a),
+            expand=True,
+            style=ft.ButtonStyle(
+                bgcolor={"": "#44CFA1", "hovered": "#3AB08F"},
+                color={"": "white"},
+                padding=ft.padding.symmetric(vertical=12, horizontal=10),
+                shape=ft.RoundedRectangleBorder(radius=8),
+                overlay_color="#38A08B"
+            )
+        )
         for item in menu_items
     ]
 
@@ -43,34 +54,75 @@ def dashboard_page(page: ft.Page):
         controls=[
             ft.Row(
                 controls=[
-                    # Barra lateral
-                    ft.Column(
-                        controls=[
-                            ft.Text(f"Olá, {user['nome']}", size=20, weight="bold"),
-                            ft.Divider(height=2, thickness=1),
-                            *menu_buttons,
-                            ft.ElevatedButton("Logout", bgcolor="red", on_click=logout_click)
-                        ],
-                        width=200,
-                        spacing=10,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                    # --- BARRA LATERAL ---
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Container(
+                                    content=ft.Text(
+                                        f"Olá, {user['nome']}",
+                                        size=20,
+                                        weight="bold",
+                                        color="#1E3D59"
+                                    ),
+                                    padding=ft.padding.only(bottom=10)
+                                ),
+                                ft.Divider(height=2, thickness=1, color="#44CFA1"),
+                                *menu_buttons,
+                                ft.Container(
+                                    content=ft.ElevatedButton(
+                                        "Logout",
+                                        bgcolor="#F28B82",
+                                        color="white",
+                                        on_click=logout_click,
+                                        style=ft.ButtonStyle(
+                                            padding=ft.padding.symmetric(vertical=12),
+                                            shape=ft.RoundedRectangleBorder(radius=8),
+                                            overlay_color="#E57373"
+                                        )
+                                    ),
+                                    padding=ft.padding.only(top=20),
+                                    width=190 
+                                )
+                            ],
+                            spacing=12,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        ),
+                        width=230,
+                        padding=ft.padding.all(15),
+                        bgcolor="#E0F7FA",
+                        border_radius=10,
+                        shadow=ft.BoxShadow(blur_radius=8, color="#C8E6C9")
                     ),
-                    # Área principal
-                    ft.Column(
-                        controls=[
-                            ft.Text("Bem-vindo ao Dashboard", size=30),
-                            ft.Text("Use o menu à esquerda para navegar pelas funcionalidades do sistema."),
-                        ],
+
+                    # --- ÁREA PRINCIPAL ---
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Text("Bem-vindo ao Dashboard 👋", size=28, weight="bold", color="#1E3D59"),
+                                ft.Text(
+                                    "Use o menu à esquerda para navegar pelas funcionalidades do sistema.",
+                                    size=16,
+                                    color="#4F5B62"
+                                ),
+                            ],
+                            expand=True,
+                            alignment=ft.MainAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=20
+                        ),
                         expand=True,
-                        alignment=ft.MainAxisAlignment.START,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        spacing=20
+                        padding=ft.padding.all(30),
+                        bgcolor="#FAFAFA",
+                        border_radius=10,
+                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0")
                     )
                 ],
                 expand=True,
-                spacing=20
+                spacing=20,
+                alignment=ft.MainAxisAlignment.START,
             )
         ],
         padding=20,
-        spacing=20
+        bgcolor="#F5F5F5"
     )
