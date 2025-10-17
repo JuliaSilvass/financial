@@ -23,3 +23,11 @@ class AmbienteController:
         else:
             logging.error(f"Erro ao cadastrar ambiente: {mensagem}")
             return False, mensagem
+    
+    def listar_ambientes(self, usuario_id):
+        sucesso, resultado = self.service.listar_ambientes_por_usuario(usuario_id)
+        if sucesso:
+            return resultado  # lista de objetos Ambiente
+        else:
+            logging.error(resultado)
+            return []

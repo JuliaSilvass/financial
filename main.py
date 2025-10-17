@@ -3,7 +3,7 @@ from ui.home_page import home_page
 from ui.login_page import login_page
 from ui.register_page import register_page
 from ui.dashboard_page import dashboard_page
-from ui.ambiente_page import ambiente_cadastrar_page
+from ui.ambiente_page import ambiente_cadastrar_page, ambiente_listar_page
 
 from database.connection_db import test_connection
 
@@ -33,7 +33,7 @@ def main(page: ft.Page):
             "/register": register_page,
             "/dashboard": dashboard_page,
             "/ambiente/cadastrar": ambiente_cadastrar_page,
-        #     "/ambiente/listar": ambiente_listar_page,
+            "/ambiente/listar": ambiente_listar_page,
         #     "/ambiente/editar": ambiente_editar_page,
         }
 

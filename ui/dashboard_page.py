@@ -16,7 +16,7 @@ def dashboard_page(page: ft.Page):
     # --- Função de navegação ---
     def navigate(area):
         if area == "Ambientes Financeiros":
-            page.go("/ambiente/cadastrar")
+            page.go("/ambiente/listar")
         else:
             page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
             page.snack_bar.open = True

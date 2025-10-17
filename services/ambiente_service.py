@@ -30,13 +30,18 @@ class AmbienteServices:
             self.db.close()
 
 
-    # Aqui o método para listar ambientes
-    # def lista_ambientes_por_usuario(self, usuario_id: int):
-    #     db: Session = SessionLocal()
-    #     try:
-    #         # Tratar
-    #     except Exception as e:
-    #         # Tratar
-    #     finally:
-    #         db.close()
-    #         logging.info("Conexão com o banco de dados encerrada.")
+    # Aqui o método para listar ambientes por usuário
+    def listar_ambientes_por_usuario(self, usuario_id: int):
+        try:
+            ambientes = (
+                self.db.query(Ambiente)
+                .filter(Ambiente.usuario_id == usuario_id)
+                .order_by(Ambiente.ambiente_dt_criacao.desc())
+                .all()
+            )
+            return True, ambientes
+        except Exception as e:
+            logging.error(f"Erro ao listar ambientes: {e}")
+            return False, f"Erro ao listar ambientes: {e}"
+        finally:
+            self.db.close()
