@@ -1,28 +1,50 @@
 import flet as ft
 from services.session_manager import SessionManager
+from controllers.user_controller import UserController
 
-def dashboard_page(page: ft.Page):
+def ambiente_cadastrar_page(page: ft.Page):
+    # Verifica se há usuário logado
     if not SessionManager.is_logged_in():
         page.go("/login")
-        return ft.View(route="/dashboard", controls=[])
+        return ft.View(route="/ambiente/cadastrar", controls=[])
 
     user = SessionManager.get_current_user()
+    controller = UserController()
 
-    # --- Função de logout ---
+    # Funções auxiliares
     def logout_click(e):
         SessionManager.logout()
         page.go("/")
 
-    # --- Função de navegação ---
     def navigate(area):
-        if area == "Ambientes Financeiros":
-            page.go("/ambiente/cadastrar")
-        else:
-            page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
-            page.snack_bar.open = True
-            page.update()
+        page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
+        page.snack_bar.open = True
+        page.update()
 
-    # --- Itens do menu lateral ---
+    # Campos do formulário
+    nome_field = ft.TextField(label="Nome do Ambiente", width=400)
+    desc_field = ft.TextField(label="Descrição", multiline=True, width=400)
+    mensagem = ft.Text(color="green")
+
+    def salvar_click(e):
+        nome = nome_field.value.strip()
+        descricao = desc_field.value.strip()
+
+        if not nome:
+            mensagem.value = "⚠️ O nome do ambiente é obrigatório."
+            mensagem.color = "red"
+        else:
+            ok, msg = controller.register_ambiente(nome, descricao, user["id"])
+            mensagem.value = msg
+            mensagem.color = "green" if ok else "red"
+
+            if ok:
+                nome_field.value = ""
+                desc_field.value = ""
+
+        page.update()
+
+    # Itens do menu lateral
     menu_items = [
         "Ambientes Financeiros",
         "Receitas e Despesas",
@@ -34,7 +56,6 @@ def dashboard_page(page: ft.Page):
         "Configurações"
     ]
 
-    # --- Botões do menu lateral ---
     menu_buttons = [
         ft.ElevatedButton(
             text=item,
@@ -51,13 +72,13 @@ def dashboard_page(page: ft.Page):
         for item in menu_items
     ]
 
-    # --- Layout principal ---
+    # Layout final da tela
     return ft.View(
-        route="/dashboard",
+        route="/ambiente/cadastrar",
         controls=[
             ft.Row(
                 controls=[
-                    # --- BARRA LATERAL ---
+                    # --- MENU LATERAL ---
                     ft.Container(
                         content=ft.Column(
                             controls=[
@@ -85,7 +106,7 @@ def dashboard_page(page: ft.Page):
                                         )
                                     ),
                                     padding=ft.padding.only(top=20),
-                                    width=190 
+                                    width=190
                                 )
                             ],
                             spacing=12,
@@ -102,20 +123,29 @@ def dashboard_page(page: ft.Page):
                     ft.Container(
                         content=ft.Column(
                             controls=[
-                                ft.Text("Bem-vindo ao Dashboard 👋", size=28, weight="bold", color="#1E3D59"),
-                                ft.Text(
-                                    "Use o menu à esquerda para navegar pelas funcionalidades do sistema.",
-                                    size=16,
-                                    color="#4F5B62"
+                                ft.Text("Cadastrar Novo Ambiente ", size=28, weight="bold", color="#1E3D59"),
+                                nome_field,
+                                desc_field,
+                                ft.ElevatedButton(
+                                    text="Salvar Ambiente",
+                                    icon=ft.Icons.SAVE,
+                                    bgcolor="#44CFA1",
+                                    color="white",
+                                    on_click=salvar_click,
+                                    style=ft.ButtonStyle(
+                                        padding=ft.padding.symmetric(vertical=14, horizontal=25),
+                                        shape=ft.RoundedRectangleBorder(radius=8),
+                                        overlay_color="#3AB08F"
+                                    )
                                 ),
+                                mensagem
                             ],
-                            expand=True,
+                            spacing=20,
                             alignment=ft.MainAxisAlignment.START,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            spacing=20
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
                         ),
                         expand=True,
-                        padding=ft.padding.all(30),
+                        padding=ft.padding.all(40),
                         bgcolor="#FAFAFA",
                         border_radius=10,
                         shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0")
@@ -123,7 +153,7 @@ def dashboard_page(page: ft.Page):
                 ],
                 expand=True,
                 spacing=20,
-                alignment=ft.MainAxisAlignment.START,
+                alignment=ft.MainAxisAlignment.START
             )
         ],
         padding=20,
