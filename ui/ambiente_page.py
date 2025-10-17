@@ -1,6 +1,6 @@
 import flet as ft
 from services.session_manager import SessionManager
-from controllers.user_controller import UserController
+from controllers.ambiente_controller import AmbienteController
 
 def ambiente_cadastrar_page(page: ft.Page):
     # Verifica se há usuário logado
@@ -9,7 +9,7 @@ def ambiente_cadastrar_page(page: ft.Page):
         return ft.View(route="/ambiente/cadastrar", controls=[])
 
     user = SessionManager.get_current_user()
-    controller = UserController()
+    controller = AmbienteController()
 
     # Funções auxiliares
     def logout_click(e):

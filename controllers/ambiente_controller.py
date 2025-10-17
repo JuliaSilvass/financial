@@ -3,7 +3,7 @@ from models.ambiente import Ambiente
 from services.ambiente_service import AmbienteServices 
 from services.session_manager import SessionManager
 
-class UserController:
+class AmbienteController:
     def __init__(self):
         self.service = AmbienteServices()
 
