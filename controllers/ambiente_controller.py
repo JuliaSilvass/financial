@@ -31,3 +31,12 @@ class AmbienteController:
         else:
             logging.error(resultado)
             return []
+
+    def get_ambiente(self, ambiente_id):
+        return self.service.get_ambiente_by_id(ambiente_id)
+
+    def update_ambiente(self, ambiente_id, nome, descricao):
+        return self.service.update_ambiente(ambiente_id, nome, descricao)
+
+    def delete_ambiente(self, ambiente_id):
+        return self.service.delete_ambiente(ambiente_id)

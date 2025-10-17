@@ -45,3 +45,49 @@ class AmbienteServices:
             return False, f"Erro ao listar ambientes: {e}"
         finally:
             self.db.close()
+
+    # seleciona ambiente por id
+    def get_ambiente_by_id(self, ambiente_id: int):
+        try:
+            ambiente = self.db.query(Ambiente).filter(Ambiente.ambiente_id == ambiente_id).first()
+            return ambiente
+        except Exception as e:
+            logging.error(f"Erro ao buscar ambiente: {e}")
+            return None
+        finally:
+            self.db.close()
+
+    # altera ambiente 
+    def update_ambiente(self, ambiente_id: int, nome: str, descricao: str):
+        try:
+            ambiente = self.db.query(Ambiente).filter(Ambiente.ambiente_id == ambiente_id).first()
+            if not ambiente:
+                return False, "Ambiente não encontrado."
+
+            ambiente.ambiente_nome = nome
+            ambiente.ambiente_descricao = descricao
+            self.db.commit()
+            return True, "Ambiente atualizado com sucesso!"
+        except Exception as e:
+            self.db.rollback()
+            logging.error(f"Erro ao atualizar ambiente: {e}")
+            return False, f"Erro: {e}"
+        finally:
+            self.db.close()
+
+    # exclui ambiente
+    def delete_ambiente(self, ambiente_id: int):
+        try:
+            ambiente = self.db.query(Ambiente).filter(Ambiente.ambiente_id == ambiente_id).first()
+            if not ambiente:
+                return False, "Ambiente não encontrado."
+            self.db.delete(ambiente)
+            self.db.commit()
+            return True, "Ambiente excluído com sucesso."
+        except Exception as e:
+            self.db.rollback()
+            logging.error(f"Erro ao excluir ambiente: {e}")
+            return False, f"Erro ao excluir ambiente: {e}"
+        finally:
+            self.db.close()
+

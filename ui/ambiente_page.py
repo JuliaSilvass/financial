@@ -2,13 +2,10 @@ import flet as ft
 from services.session_manager import SessionManager
 from controllers.ambiente_controller import AmbienteController
 
-
 # ----------------------------------------------------------
-# 🔹 Função utilitária para criar a barra lateral unificada
+# Barra lateral padrão
 # ----------------------------------------------------------
 def barra_lateral(user, page, current_page):
-    """Cria a barra lateral com os botões corretos ativos/desativados"""
-    
     def go_to_listar(e):
         if current_page != "listar":
             page.go("/ambiente/listar")
@@ -25,17 +22,10 @@ def barra_lateral(user, page, current_page):
         content=ft.Column(
             controls=[
                 ft.Container(
-                    content=ft.Text(
-                        f"Olá, {user['nome']}",
-                        size=20,
-                        weight="bold",
-                        color="#1E3D59"
-                    ),
+                    content=ft.Text(f"Olá, {user['nome']}", size=20, weight="bold", color="#1E3D59"),
                     padding=ft.padding.only(bottom=10)
                 ),
                 ft.Divider(height=2, thickness=1, color="#44CFA1"),
-
-                # Botões principais da barra lateral
                 ft.ElevatedButton(
                     text="Listar Ambientes",
                     icon=ft.Icons.LIST,
@@ -74,7 +64,92 @@ def barra_lateral(user, page, current_page):
 
 
 # --------------------------------------------------------------------
-# 📋 Página de CADASTRO
+# Página de LISTAGEM (cada linha clicável)
+# --------------------------------------------------------------------
+def ambiente_listar_page(page: ft.Page):
+    if not SessionManager.is_logged_in():
+        page.go("/login")
+        return ft.View(route="/ambiente/listar", controls=[])
+
+    user = SessionManager.get_current_user()
+    controller = AmbienteController()
+    tabela = ft.Column(spacing=10)
+
+    def voltar_click(e):
+        page.go("/dashboard")
+
+    def carregar_lista():
+        ambientes = controller.listar_ambientes(user["id"])
+        tabela.controls.clear()
+
+        if not ambientes:
+            tabela.controls.append(ft.Text("Nenhum ambiente encontrado.", color="gray"))
+        else:
+            for amb in ambientes:
+                linha = ft.Container(
+                    content=ft.Row(
+                        [
+                            ft.Text(f"{amb.ambiente_nome}", width=200, weight="bold"),
+                            ft.Text(amb.ambiente_descricao or "-", width=250),
+                            ft.Text(str(amb.ambiente_dt_criacao)[:16], width=160),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
+                    padding=ft.padding.symmetric(vertical=10, horizontal=15),
+                    border_radius=8,
+                    bgcolor="#F1F8E9",
+                    on_click=lambda e, a_id=amb.ambiente_id: page.go(f"/ambiente/detalhar/{a_id}")
+                )
+                linha.hover_color = "#C8E6C9"
+                tabela.controls.append(linha)
+        page.update()
+
+    carregar_lista()
+
+    return ft.View(
+        route="/ambiente/listar",
+        controls=[
+            ft.Row(
+                controls=[
+                    barra_lateral(user, page, "listar"),
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Row(
+                                    [
+                                        ft.IconButton(
+                                            icon=ft.Icons.ARROW_BACK,
+                                            tooltip="Voltar ao dashboard",
+                                            on_click=voltar_click
+                                        ),
+                                        ft.Text("Ambientes Cadastrados 🏠", size=26, weight="bold", color="#1E3D59")
+                                    ],
+                                    alignment=ft.MainAxisAlignment.START
+                                ),
+                                ft.Divider(),
+                                tabela
+                            ],
+                            spacing=15,
+                            expand=True
+                        ),
+                        expand=True,
+                        padding=ft.padding.all(30),
+                        bgcolor="#FAFAFA",
+                        border_radius=10,
+                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0"),
+                    )
+                ],
+                expand=True,
+                spacing=20
+            )
+        ],
+        padding=20,
+        bgcolor="#F5F5F5"
+    )
+
+
+# --------------------------------------------------------------------
+# Página de CADASTRO
 # --------------------------------------------------------------------
 def ambiente_cadastrar_page(page: ft.Page):
     if not SessionManager.is_logged_in():
@@ -84,16 +159,13 @@ def ambiente_cadastrar_page(page: ft.Page):
     user = SessionManager.get_current_user()
     controller = AmbienteController()
 
-    # Campos do formulário
     nome_field = ft.TextField(label="Nome do Ambiente", width=400)
     desc_field = ft.TextField(label="Descrição", multiline=True, width=400)
     mensagem = ft.Text(color="green")
 
-    # Voltar
     def voltar_click(e):
         page.go("/ambiente/listar")
 
-    # Salvar
     def salvar_click(e):
         nome = nome_field.value.strip()
         descricao = desc_field.value.strip()
@@ -116,7 +188,6 @@ def ambiente_cadastrar_page(page: ft.Page):
                 return
         page.update()
 
-    # Layout principal
     return ft.View(
         route="/ambiente/cadastrar",
         controls=[
@@ -175,82 +246,116 @@ def ambiente_cadastrar_page(page: ft.Page):
 
 
 # --------------------------------------------------------------------
-# 📋 Página de LISTAGEM
+# Página de DETALHES / EDIÇÃO / EXCLUSÃO
 # --------------------------------------------------------------------
-def ambiente_listar_page(page: ft.Page):
+def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
     if not SessionManager.is_logged_in():
         page.go("/login")
-        return ft.View(route="/ambiente/listar", controls=[])
+        return ft.View(route=f"/ambiente/detalhar/{ambiente_id}", controls=[])
 
     user = SessionManager.get_current_user()
     controller = AmbienteController()
+    ambiente = controller.get_ambiente(ambiente_id)
 
-    tabela = ft.Column(spacing=10)
+    if not ambiente:
+        page.snack_bar = ft.SnackBar(ft.Text("⚠️ Ambiente não encontrado."))
+        page.snack_bar.open = True
+        page.go("/ambiente/listar")
+        return
 
-    # Voltar
+    nome_field = ft.TextField(label="Nome do Ambiente", width=400, value=ambiente.ambiente_nome)
+    desc_field = ft.TextField(label="Descrição", multiline=True, width=400, value=ambiente.ambiente_descricao)
+    mensagem = ft.Text(color="green")
+
     def voltar_click(e):
-        page.go("/dashboard")
+        page.go("/ambiente/listar")
 
-    # Carregar tabela
-    def carregar_lista():
-        ambientes = controller.listar_ambientes(user["id"])
-        tabela.controls.clear()
-
-        if not ambientes:
-            tabela.controls.append(ft.Text("Nenhum ambiente encontrado.", color="gray"))
-        else:
-            for amb in ambientes:
-                tabela.controls.append(
-                    ft.Row(
-                        [
-                            ft.Text(f"{amb.ambiente_nome}", width=200, weight="bold"),
-                            ft.Text(amb.ambiente_descricao or "-", width=250),
-                            ft.Text(str(amb.ambiente_dt_criacao)[:16], width=160),
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    )
-                )
+    def salvar_click(e):
+        ok, msg = controller.update_ambiente(ambiente_id, nome_field.value.strip(), desc_field.value.strip())
+        mensagem.value = msg
+        mensagem.color = "green" if ok else "red"
         page.update()
 
-    carregar_lista()
+    def excluir_click(e):
+        def confirmar_excluir(e):
+            ok, msg = controller.delete_ambiente(ambiente_id)
+            dlg.open = False
+            if ok:
+                page.snack_bar = ft.SnackBar(ft.Text("✅ Ambiente excluído com sucesso!"))
+                page.snack_bar.open = True
+                page.go("/ambiente/listar")
+            else:
+                page.snack_bar = ft.SnackBar(ft.Text(f"Erro: {msg}"))
+                page.snack_bar.open = True
+            page.update()
+
+        dlg = ft.AlertDialog(
+            title=ft.Text("Confirmar exclusão"),
+            content=ft.Text("Tem certeza que deseja excluir este ambiente? Esta ação é irreversível."),
+            actions=[
+                ft.TextButton("Cancelar", on_click=lambda e: setattr(dlg, "open", False)),
+                ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
+            ],
+        )
+        page.dialog = dlg
+        dlg.open = True
+        page.update()
 
     return ft.View(
-        route="/ambiente/listar",
+        route=f"/ambiente/detalhar/{ambiente_id}",
         controls=[
             ft.Row(
                 controls=[
-                    barra_lateral(user, page, "listar"),
+                    barra_lateral(user, page, "detalhar"),
                     ft.Container(
                         content=ft.Column(
                             controls=[
                                 ft.Row(
                                     [
-                                        ft.IconButton(
-                                            icon=ft.Icons.ARROW_BACK,
-                                            tooltip="Voltar ao dashboard",
-                                            on_click=voltar_click
-                                        ),
-                                        ft.Text("Ambientes Cadastrados 🏠", size=26, weight="bold", color="#1E3D59")
+                                        ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
+                                        ft.Text("Detalhes do Ambiente 🏠", size=26, weight="bold", color="#1E3D59"),
                                     ],
-                                    alignment=ft.MainAxisAlignment.START
+                                    alignment=ft.MainAxisAlignment.START,
                                 ),
                                 ft.Divider(),
-                                tabela
+                                nome_field,
+                                desc_field,
+                                ft.Row(
+                                    [
+                                        ft.ElevatedButton(
+                                            text="Salvar Alterações",
+                                            icon=ft.Icons.SAVE,
+                                            bgcolor="#44CFA1",
+                                            color="white",
+                                            on_click=salvar_click,
+                                        ),
+                                        ft.ElevatedButton(
+                                            text="Excluir Ambiente",
+                                            icon=ft.Icons.DELETE,
+                                            bgcolor="#F28B82",
+                                            color="white",
+                                            on_click=excluir_click,
+                                        ),
+                                    ],
+                                    spacing=15,
+                                ),
+                                mensagem,
                             ],
-                            spacing=15,
-                            expand=True
+                            spacing=20,
+                            alignment=ft.MainAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
                         expand=True,
-                        padding=ft.padding.all(30),
+                        padding=ft.padding.all(40),
                         bgcolor="#FAFAFA",
                         border_radius=10,
-                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0")
-                    )
+                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0"),
+                    ),
                 ],
                 expand=True,
-                spacing=20
-            )
+                spacing=20,
+            ),
         ],
         padding=20,
-        bgcolor="#F5F5F5"
+        bgcolor="#F5F5F5",
     )
