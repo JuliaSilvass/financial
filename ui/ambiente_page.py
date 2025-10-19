@@ -181,7 +181,7 @@ def ambiente_cadastrar_page(page: ft.Page):
             if ok:
                 nome_field.value = ""
                 desc_field.value = ""
-                page.snack_bar = ft.SnackBar(ft.Text("✅ Ambiente cadastrado com sucesso!"))
+                page.snack_bar = ft.SnackBar(ft.Text("Ambiente cadastrado com sucesso!"))
                 page.snack_bar.open = True
                 page.update()
                 page.go("/ambiente/listar")
@@ -258,7 +258,7 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
     ambiente = controller.get_ambiente(ambiente_id)
 
     if not ambiente:
-        page.snack_bar = ft.SnackBar(ft.Text("⚠️ Ambiente não encontrado."))
+        page.snack_bar = ft.SnackBar(ft.Text("Ambiente não encontrado."))
         page.snack_bar.open = True
         page.go("/ambiente/listar")
         return
@@ -281,7 +281,7 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
             ok, msg = controller.delete_ambiente(ambiente_id)
             dlg.open = False
             if ok:
-                page.snack_bar = ft.SnackBar(ft.Text("✅ Ambiente excluído com sucesso!"))
+                page.snack_bar = ft.SnackBar(ft.Text("Ambiente excluído com sucesso!"))
                 page.snack_bar.open = True
                 page.go("/ambiente/listar")
             else:
@@ -313,7 +313,7 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
                                 ft.Row(
                                     [
                                         ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
-                                        ft.Text("Detalhes do Ambiente 🏠", size=26, weight="bold", color="#1E3D59"),
+                                        ft.Text("Detalhes do Ambiente", size=26, weight="bold", color="#1E3D59"),
                                     ],
                                     alignment=ft.MainAxisAlignment.START,
                                 ),
