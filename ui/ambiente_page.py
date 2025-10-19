@@ -277,9 +277,13 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
         page.update()
 
     def excluir_click(e):
-        def confirmar_excluir(e):
+        print(">>> [DEBUG] excluir_click chamado")
+
+        def confirmar_excluir(ev):
+            print(">>> [DEBUG] confirmar_excluir chamado (BottomSheet)")
             ok, msg = controller.delete_ambiente(ambiente_id)
-            dlg.open = False
+            bs.open = False
+            page.update()
             if ok:
                 page.snack_bar = ft.SnackBar(ft.Text("Ambiente excluído com sucesso!"))
                 page.snack_bar.open = True
@@ -289,17 +293,30 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
                 page.snack_bar.open = True
             page.update()
 
-        dlg = ft.AlertDialog(
-            title=ft.Text("Confirmar exclusão"),
-            content=ft.Text("Tem certeza que deseja excluir este ambiente? Esta ação é irreversível."),
-            actions=[
-                ft.TextButton("Cancelar", on_click=lambda e: setattr(dlg, "open", False)),
-                ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
-            ],
+        bs = ft.BottomSheet(
+            ft.Container(
+                ft.Column(
+                    [
+                        ft.Text("Confirmar exclusão", weight="bold", size=18),
+                        ft.Text("Tem certeza que deseja excluir este ambiente? Esta ação é irreversível."),
+                        ft.Row(
+                            [
+                                ft.TextButton("Cancelar", on_click=lambda ev: (setattr(bs, "open", False), page.update())),
+                                ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
+                            ],
+                            alignment=ft.MainAxisAlignment.END
+                        )
+                    ],
+                    tight=True,
+                    spacing=10
+                ),
+                padding=20,
+            ),
+            open=True,
         )
-        page.dialog = dlg
-        dlg.open = True
+        page.overlay.append(bs)
         page.update()
+
 
     return ft.View(
         route=f"/ambiente/detalhar/{ambiente_id}",
