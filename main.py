@@ -8,6 +8,11 @@ from ui.ambiente_page import (
     ambiente_listar_page,
     ambiente_detalhar_page,
 )
+from ui.categoria_page import (
+    categoria_listar_page, 
+    categoria_cadastrar_page,
+    categoria_detalhar_page
+)
 from database.connection_db import test_connection
 
 
@@ -41,6 +46,18 @@ def main(page: ft.Page):
                 page.go("/ambiente/listar")
             page.update()
             return  # evita cair no dicionário abaixo
+        
+        # Rota dinâmica: /categoria/detalhar/{id}
+        if route.startswith("/categoria/detalhar/"):
+            try:
+                categoria_id = int(route.split("/")[-1])
+                page.views.append(categoria_detalhar_page(page, categoria_id))
+            except ValueError:
+                page.snack_bar = ft.SnackBar(ft.Text("ID inválido para categoria."))
+                page.snack_bar.open = True
+                page.go("/categoria/listar")
+            page.update()
+            return  
 
         # Demais rotas fixas
         routes = {
@@ -50,6 +67,8 @@ def main(page: ft.Page):
             "/dashboard": dashboard_page,
             "/ambiente/cadastrar": ambiente_cadastrar_page,
             "/ambiente/listar": ambiente_listar_page,
+            "/categoria/cadastrar": categoria_cadastrar_page,
+            "/categoria/listar": categoria_listar_page,
         }
 
         # Se a rota existir, renderiza a página correspondente

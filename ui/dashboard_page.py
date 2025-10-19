@@ -17,6 +17,8 @@ def dashboard_page(page: ft.Page):
     def navigate(area):
         if area == "Ambientes Financeiros":
             page.go("/ambiente/listar")
+        elif area == "Categorias":
+            page.go("/categoria/listar")
         else:
             page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
             page.snack_bar.open = True
@@ -102,7 +104,7 @@ def dashboard_page(page: ft.Page):
                     ft.Container(
                         content=ft.Column(
                             controls=[
-                                ft.Text("Bem-vindo ao Dashboard 👋", size=28, weight="bold", color="#1E3D59"),
+                                ft.Text("Bem-vindo ao Dashboard", size=28, weight="bold", color="#1E3D59"),
                                 ft.Text(
                                     "Use o menu à esquerda para navegar pelas funcionalidades do sistema.",
                                     size=16,
