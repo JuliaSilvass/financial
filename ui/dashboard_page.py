@@ -19,6 +19,8 @@ def dashboard_page(page: ft.Page):
             page.go("/ambiente/listar")
         elif area == "Categorias":
             page.go("/categoria/listar")
+        elif area == "Contas":
+            page.go("/conta/listar")
         else:
             page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
             page.snack_bar.open = True
@@ -30,6 +32,7 @@ def dashboard_page(page: ft.Page):
         "Receitas e Despesas",
         "Metas",
         "Categorias",
+        "Contas",
         "Relatórios",
         "Compartilhamento",
         "Perfil Financeiro",

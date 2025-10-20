@@ -13,6 +13,11 @@ from ui.categoria_page import (
     categoria_cadastrar_page,
     categoria_detalhar_page
 )
+from ui.conta_page import (
+    conta_listar_page, 
+    conta_cadastrar_page,
+    conta_detalhar_page
+)
 from database.connection_db import test_connection
 
 
@@ -59,6 +64,18 @@ def main(page: ft.Page):
             page.update()
             return  
 
+                # Rota dinâmica: /conta/detalhar/{id}
+        if route.startswith("/conta/detalhar/"):
+            try:
+                conta_id = int(route.split("/")[-1])
+                page.views.append(conta_detalhar_page(page, conta_id))
+            except ValueError:
+                page.snack_bar = ft.SnackBar(ft.Text("ID inválido para conta."))
+                page.snack_bar.open = True
+                page.go("/conta/listar")
+            page.update()
+            return  # evita cair no dicionário abaixo
+        
         # Demais rotas fixas
         routes = {
             "/": home_page,
@@ -69,6 +86,8 @@ def main(page: ft.Page):
             "/ambiente/listar": ambiente_listar_page,
             "/categoria/cadastrar": categoria_cadastrar_page,
             "/categoria/listar": categoria_listar_page,
+            "/conta/cadastrar": conta_cadastrar_page,
+            "/conta/listar": conta_listar_page,
         }
 
         # Se a rota existir, renderiza a página correspondente
