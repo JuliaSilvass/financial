@@ -46,7 +46,7 @@ CREATE TABLE transacao (
     transacao_dt_vencimento DATE,
     transacao_total_parcelas INTEGER DEFAULT 1 CHECK (transacao_total_parcelas >= 1),
     transacao_parcela_atual INTEGER DEFAULT 1 CHECK (transacao_parcela_atual >= 1),
-    conta_id INTEGER NOT NULL REFERENCES conta(conta_id) ON DELETE CASCADE
+    conta_id INTEGER NOT NULL REFERENCES conta(conta_id) ON DELETE CASCADE   
 );
 
 -- Tabela: conta
