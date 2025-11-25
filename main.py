@@ -116,7 +116,6 @@ def main(page: ft.Page):
             page.views.append(home_page(page))  # rota padrão (fallback)
 
         page.update()
-
     # Define o callback e abre a página inicial
     page.on_route_change = route_change
     page.go("/")

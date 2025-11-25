@@ -1,7 +1,10 @@
 import flet as ft
 from services.session_manager import SessionManager
 from controllers.transacao_controller import TransacaoController
-
+from controllers.ambiente_controller import AmbienteController
+from controllers.categoria_controller import CategoriaController
+from controllers.conta_controller import ContaController
+# from controllers.meta_controller import MetaController
 
 def barra_lateral(user, page, current_page):
     def go_to_listar(e):
@@ -87,11 +90,10 @@ def transacao_listar_page(page: ft.Page):
                 linha = ft.Container(
                     content=ft.Row(
                         [
-                            ft.Text(f"{transacao.conta_nome}", width=200, weight="bold"),
-                            # ft.Text(transacao.conta_tipo or "-", width=200),
-                            # ft.Text(f"R$ {transacao.conta_saldo_limite_inicial:.2f}", width=150),
-                            # ft.Text(f"R$ {transacao.conta_saldo_limite_disponivel:.2f}", width=150),
-                            # ft.Text("Ativa" if transacao.conta_ativo else "Inativa", width=100),
+                            ft.Text(f"ID Conta: {transacao.conta_id}", width=150, weight="bold"),
+                            ft.Text(f"Valor: R$ {float(transacao.transacao_valor):.2f}", width=150),
+                            ft.Text(f"Tipo: {transacao.transacao_tipo}", width=120),
+                            ft.Text(f"Data: {transacao.transacao_data}", width=150),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     ),
@@ -155,22 +157,67 @@ def transacao_cadastrar_page(page: ft.Page):
     user = SessionManager.get_current_user()
     controller = TransacaoController()
 
-    nome_field = ft.TextField(label="Nome da Transacao", width=400)
-    # tipo_field = ft.Dropdown(
-    #     label="Tipo de Transação",
+    ambienteController = AmbienteController()
+    categoriaController = CategoriaController()
+    contaController = ContaController()
+    # metaController = MetaController()
+
+    ambientes = ambienteController.listar_ambientes(user["id"])
+    categorias = categoriaController.listar_categoria(user["id"])
+    contas = contaController.listar_conta(user["id"])
+    # metas = metaController.listar_metas(user["id"])
+
+    # Campos principais
+    descricao_field = ft.TextField(label="Descrição da Transação", width=400)
+    valor_field = ft.TextField(label="Valor (R$)", width=400)
+    data_field = ft.TextField(label="Data (AAAA-MM-DD)", width=400)
+    tipo_field = ft.Dropdown(
+        label="Tipo da Transação",
+        width=400,
+        options=[
+            ft.dropdown.Option("receita", "Receita"),
+            ft.dropdown.Option("despesa", "Despesa"),
+        ]
+    )
+    modo_field = ft.Dropdown(
+        label="Modo de Pagamento",
+        width=400,
+        options=[
+            ft.dropdown.Option("pix", "PIX"),
+            ft.dropdown.Option("dinheiro", "Dinheiro"),
+            ft.dropdown.Option("debito", "Débito"),
+            ft.dropdown.Option("credito", "Crédito"),
+            ft.dropdown.Option("TED", "TED"),
+            ft.dropdown.Option("DOC", "DOC"),
+            ft.dropdown.Option("outros", "Outros"),
+        ]
+    )
+    ambiente_field = ft.Dropdown(
+    label="Ambiente",
+    width=400,
+    options=[ft.dropdown.Option(str(a.ambiente_id), a.ambiente_nome) for a in ambientes],
+    )
+
+    categoria_field = ft.Dropdown(
+        label="Categoria",
+        width=400,
+        options=[ft.dropdown.Option(str(c.categoria_id), c.categoria_nome) for c in categorias],
+    )
+
+    conta_field = ft.Dropdown(
+        label="Conta",
+        width=400,
+        options=[ft.dropdown.Option(str(ct.conta_id), ct.conta_nome) for ct in contas],
+    )
+
+    # meta_field (opcional, deixar comentado por enquanto)
+    # meta_field = ft.Dropdown(
+    #     label="Meta (opcional)",
     #     width=400,
-    #     options=[
-    #         ft.dropdown.Option("corrente", "Conta Corrente"),
-    #         ft.dropdown.Option("poupanca", "Poupança"),
-    #         ft.dropdown.Option("investimento", "Investimento"),
-    #         ft.dropdown.Option("cartao_credito", "Cartão de Crédito"),
-    #         ft.dropdown.Option("carteira", "Carteira"),
-    #         ft.dropdown.Option("outros", "Outros"),
-    #     ]
+    #     options=[ft.dropdown.Option(str(m.meta_id), m.meta_nome) for m in metas],
     # )
-    # saldo_inicial_field = ft.TextField(label="Saldo Inicial", width=400)
-    # saldo_disponivel_field = ft.TextField(label="Saldo Disponível", width=400)
-    # ativo_field = ft.Checkbox(label="Conta Ativa", value=True)
+
+    pago_field = ft.Checkbox(label="Pago", value=True)
     mensagem = ft.Text(color="green")
 
     def to_float(value):
@@ -183,30 +230,51 @@ def transacao_cadastrar_page(page: ft.Page):
         page.go("/transacao/listar")
 
     def salvar_click(e):
-        nome = nome_field.value.strip()
-        # tipo = tipo_field.value
-        # saldo_inicial = to_float(saldo_inicial_field.value)
-        # saldo_disponivel = to_float(saldo_disponivel_field.value)
-        # conta_ativo = ativo_field.value
+        descricao = descricao_field.value.strip()
+        valor = to_float(valor_field.value)
+        data = data_field.value.strip()
+        tipo = tipo_field.value
+        modo = modo_field.value
+        ambiente_id = ambiente_field.value
+        categoria_id = categoria_field.value
+        conta_id = conta_field.value
+        # meta_id = meta_field.value if meta_field.value else None
+        pago = pago_field.value
 
-        if not nome:
-            mensagem.value = "Nome da transação é obrigatório."
+        if not descricao or valor <= 0 or not data or not tipo or not modo or not ambiente_id or not categoria_id or not conta_id:
+            mensagem.value = "Preencha todos os campos obrigatórios."
             mensagem.color = "red"
         else:
-            ok, msg = controller.register_transacao(nome, user["id"])
+            ok, msg = controller.register_transacao(
+                descricao=descricao,
+                valor=valor,
+                data=data,
+                ambiente_id=int(ambiente_id),
+                categoria_id=int(categoria_id),
+                conta_id=int(conta_id),
+                tipo=tipo,
+                modo=modo,
+                pago=pago
+            )
             mensagem.value = msg
             mensagem.color = "green" if ok else "red"
 
             if ok:
-                nome_field.value = ""
-                # tipo_field.value = None
-                # saldo_inicial_field.value = ""
-                # saldo_disponivel_field.value = ""
-                # ativo_field.value = True
+                descricao_field.value = ""
+                valor_field.value = ""
+                data_field.value = ""
+                tipo_field.value = None
+                modo_field.value = None
+                ambiente_field.value = ""
+                categoria_field.value = ""
+                conta_field.value = ""
+                pago_field.value = True
+
                 page.snack_bar = ft.SnackBar(ft.Text("Transação cadastrada com sucesso!"))
                 page.snack_bar.open = True
                 page.go("/transacao/listar")
         page.update()
+
 
     return ft.View(
         route="/transacao/cadastrar",
@@ -219,16 +287,22 @@ def transacao_cadastrar_page(page: ft.Page):
                             controls=[
                                 ft.Row([
                                     ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
-                                    ft.Text("Cadastrar Nova transação", size=26, weight="bold", color="#1E3D59")
+                                    ft.Text("Cadastrar Nova Transação", size=26, weight="bold", color="#1E3D59")
                                 ]),
                                 ft.Divider(),
-                                nome_field,
-                                # tipo_field,
-                                # saldo_inicial_field,
-                                # saldo_disponivel_field,
-                                # ativo_field,
+                                descricao_field,
+                                valor_field,
+                                data_field,
+                                tipo_field,
+                                modo_field,
+                                ambiente_field,
+                                categoria_field,
+                                conta_field,
+                                # meta_field,
+                                pago_field,
+
                                 ft.ElevatedButton(
-                                    text="Salvar transação",
+                                    text="Salvar Transação",
                                     icon=ft.Icons.SAVE,
                                     bgcolor="#44CFA1",
                                     color="white",
@@ -254,8 +328,6 @@ def transacao_cadastrar_page(page: ft.Page):
         padding=20,
         bgcolor="#F5F5F5"
     )
-
-
 # --------------------------------------------------------------------
 # Página de DETALHES / EDIÇÃO / EXCLUSÃO
 # --------------------------------------------------------------------

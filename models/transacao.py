@@ -14,7 +14,7 @@ class Transacao(Base):
     # Relações
     transacao_ambiente_id = Column(Integer, ForeignKey("ambiente.ambiente_id", ondelete="CASCADE"), nullable=False)
     transacao_categoria_id = Column(Integer, ForeignKey("categoria.categoria_id", ondelete="CASCADE"), nullable=False)
-    transacao_meta_id = Column(Integer, ForeignKey("meta.meta_id", ondelete="SET NULL"), nullable=True)
+    # transacao_meta_id = Column(Integer, ForeignKey("meta.meta_id", ondelete="SET NULL"), nullable=True)
     conta_id = Column(Integer, ForeignKey("conta.conta_id", ondelete="CASCADE"), nullable=False)
 
     # Informações adicionais
@@ -42,7 +42,9 @@ class Transacao(Base):
 
     def __init__(
         self, descricao, valor, data, ambiente_id, categoria_id,
-        conta_id, tipo, modo, pago=True, meta_id=None, local=None, observacao=None,
+        conta_id, tipo, modo, pago=True, 
+        # meta_id=None, 
+        local=None, observacao=None,
         recorrencia=False, frequencia=None, tipo_recorrencia=None, dt_fim_recorrencia=None,
         dt_pagamento=None, dt_vencimento=None, total_parcelas=1, parcela_atual=1,
     ):
@@ -51,7 +53,7 @@ class Transacao(Base):
         self.transacao_data = data
         self.transacao_ambiente_id = ambiente_id
         self.transacao_categoria_id = categoria_id
-        self.transacao_meta_id = meta_id
+        # self.transacao_meta_id = meta_id
         self.transacao_local = local
         self.transacao_observacao = observacao
         self.transacao_recorrencia = recorrencia

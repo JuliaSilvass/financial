@@ -1,5 +1,6 @@
 #services/transacao_service.py
 from models.transacao import Transacao
+from models.ambiente import Ambiente
 from sqlalchemy.orm import Session
 from database.connection_db import SessionLocal
 from datetime import date
@@ -15,14 +16,17 @@ class TransacaoService:
     # --------------------------------------------------------
     def create_transacao(self, descricao: str, valor: float, data: date, ambiente_id: int,
                                 categoria_id: int, conta_id: int, tipo: str, modo: str, 
-                                pago: bool = True,meta_id: int = None,local: str = None,
+                                pago: bool = True,
+                                # meta_id: int = None,
+                                local: str = None,
                                 observacao: str = None, recorrencia: bool = False, frequencia: str = None,
                                 tipo_recorrencia: str = None, dt_fim_recorrencia: date = None, dt_pagamento: date = None,
                                 dt_vencimento: date = None, total_parcelas: int = 1, parcela_atual: int = 1):
         try:
             nova_transacao = Transacao(
                 descricao=descricao, valor=valor, data=data, ambiente_id=ambiente_id, 
-                categoria_id=categoria_id, conta_id=conta_id, tipo=tipo, modo=modo, pago=pago, meta_id=meta_id,
+                categoria_id=categoria_id, conta_id=conta_id, tipo=tipo, modo=modo, pago=pago, 
+                # meta_id=meta_id,
                 local=local, observacao=observacao, recorrencia=recorrencia, frequencia=frequencia,
                 tipo_recorrencia=tipo_recorrencia, dt_fim_recorrencia=dt_fim_recorrencia, dt_pagamento=dt_pagamento,
                 dt_vencimento=dt_vencimento, total_parcelas=total_parcelas, parcela_atual=parcela_atual
@@ -46,8 +50,8 @@ class TransacaoService:
         try:
             transacoes = (
                 self.db.query(Transacao)
-                .join("ambiente")  # relaciona com a tabela ambiente via chave estrangeira
-                .filter_by(usuario_id=usuario_id)
+                .join(Ambiente, Transacao.transacao_ambiente_id == Ambiente.ambiente_id)
+                .filter(Ambiente.usuario_id == usuario_id)
                 .order_by(Transacao.transacao_data.desc())
                 .all()
             )
