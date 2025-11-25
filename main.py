@@ -18,6 +18,11 @@ from ui.conta_page import (
     conta_cadastrar_page,
     conta_detalhar_page
 )
+from ui.transacoes_page import (
+    transacao_listar_page, 
+    transacao_cadastrar_page,
+    transacao_detalhar_page
+)
 from database.connection_db import test_connection
 
 
@@ -64,7 +69,7 @@ def main(page: ft.Page):
             page.update()
             return  
 
-                # Rota dinâmica: /conta/detalhar/{id}
+        # Rota dinâmica: /conta/detalhar/{id}
         if route.startswith("/conta/detalhar/"):
             try:
                 conta_id = int(route.split("/")[-1])
@@ -74,8 +79,20 @@ def main(page: ft.Page):
                 page.snack_bar.open = True
                 page.go("/conta/listar")
             page.update()
-            return  # evita cair no dicionário abaixo
+            return
         
+        # Rota dinâmica: /transacao/detalhar/{id}
+        if route.startswith("/transacao/detalhar/"):
+            try:
+                conta_id = int(route.split("/")[-1])
+                page.views.append(transacao_detalhar_page(page, transacao_id))
+            except ValueError:
+                page.snack_bar = ft.SnackBar(ft.Text("ID inválido para transação."))
+                page.snack_bar.open = True
+                page.go("/transacao/listar")
+            page.update()
+            return  
+
         # Demais rotas fixas
         routes = {
             "/": home_page,
@@ -88,6 +105,8 @@ def main(page: ft.Page):
             "/categoria/listar": categoria_listar_page,
             "/conta/cadastrar": conta_cadastrar_page,
             "/conta/listar": conta_listar_page,
+            "/transacao/cadastrar": transacao_cadastrar_page,
+            "/transacao/listar": transacao_listar_page,
         }
 
         # Se a rota existir, renderiza a página correspondente

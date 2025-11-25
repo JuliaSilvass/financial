@@ -21,6 +21,8 @@ def dashboard_page(page: ft.Page):
             page.go("/categoria/listar")
         elif area == "Contas":
             page.go("/conta/listar")
+        elif area == "Transações":
+            page.go("/transacao/listar")
         else:
             page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
             page.snack_bar.open = True
@@ -29,7 +31,7 @@ def dashboard_page(page: ft.Page):
     # --- Itens do menu lateral ---
     menu_items = [
         "Ambientes Financeiros",
-        "Receitas e Despesas",
+        "Transações",
         "Metas",
         "Categorias",
         "Contas",
