@@ -81,8 +81,9 @@ class TransacaoController:
     # --------------------------------------------------------
     # Buscar transação por ID
     # --------------------------------------------------------
-    def get_transacao(self, transacao_id):
+    def get_transacao(self, transacao_id: int):
         return self.service.get_transacao_by_id(transacao_id)
+
 
     # --------------------------------------------------------
     # Atualizar transação existente

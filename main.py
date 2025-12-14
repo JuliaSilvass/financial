@@ -82,16 +82,18 @@ def main(page: ft.Page):
             return
         
         # Rota dinâmica: /transacao/detalhar/{id}
+        # Rota dinâmica: /transacao/detalhar/{id}
         if route.startswith("/transacao/detalhar/"):
             try:
-                conta_id = int(route.split("/")[-1])
+                transacao_id = int(route.split("/")[-1])
                 page.views.append(transacao_detalhar_page(page, transacao_id))
             except ValueError:
                 page.snack_bar = ft.SnackBar(ft.Text("ID inválido para transação."))
                 page.snack_bar.open = True
                 page.go("/transacao/listar")
             page.update()
-            return  
+            return
+
 
         # Demais rotas fixas
         routes = {

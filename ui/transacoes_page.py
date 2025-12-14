@@ -328,6 +328,8 @@ def transacao_cadastrar_page(page: ft.Page):
         padding=20,
         bgcolor="#F5F5F5"
     )
+
+
 # --------------------------------------------------------------------
 # Página de DETALHES / EDIÇÃO / EXCLUSÃO
 # --------------------------------------------------------------------
@@ -341,28 +343,43 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
     transacao = controller.get_transacao(transacao_id)
 
     if not transacao:
-        page.snack_bar = ft.SnackBar(ft.Text("Transacao não encontrada."))
+        page.snack_bar = ft.SnackBar(ft.Text("Transação não encontrada."))
         page.snack_bar.open = True
         page.go("/transacao/listar")
         return
 
-    nome_field = ft.TextField(label="Nome da transacao", width=400, value=transacao.transacao_nome)
-    # tipo_field = ft.Dropdown(
-    #     label="Tipo de Conta",
-    #     width=400,
-    #     value=conta.conta_tipo,
-    #     options=[
-    #         ft.dropdown.Option("corrente", "Conta Corrente"),
-    #         ft.dropdown.Option("poupanca", "Poupança"),
-    #         ft.dropdown.Option("investimento", "Investimento"),
-    #         ft.dropdown.Option("cartao_credito", "Cartão de Crédito"),
-    #         ft.dropdown.Option("carteira", "Carteira"),
-    #         ft.dropdown.Option("outros", "Outros"),
-    #     ]
-    # )
-    # saldo_inicial_field = ft.TextField(label="Saldo Inicial", width=400, value=str(conta.conta_saldo_limite_inicial))
-    # saldo_disponivel_field = ft.TextField(label="Saldo Disponível", width=400, value=str(conta.conta_saldo_limite_disponivel))
-    # ativo_field = ft.Checkbox(label="Conta Ativa", value=conta.conta_ativo)
+    # --- Campos editáveis ---
+    descricao_field = ft.TextField(label="Descrição", width=400, value=transacao.transacao_descricao)
+    valor_field = ft.TextField(label="Valor (R$)", width=400, value=str(transacao.transacao_valor))
+    tipo_field = ft.Dropdown(
+        label="Tipo",
+        width=400,
+        value=transacao.transacao_tipo,
+        options=[
+            ft.dropdown.Option("receita", "Receita"),
+            ft.dropdown.Option("despesa", "Despesa"),
+        ]
+    )
+    modo_field = ft.Dropdown(
+        label="Modo de Pagamento",
+        width=400,
+        value=transacao.transacao_modo,
+        options=[
+            ft.dropdown.Option("pix", "PIX"),
+            ft.dropdown.Option("dinheiro", "Dinheiro"),
+            ft.dropdown.Option("debito", "Débito"),
+            ft.dropdown.Option("credito", "Crédito"),
+            ft.dropdown.Option("TED", "TED"),
+            ft.dropdown.Option("DOC", "DOC"),
+            ft.dropdown.Option("outros", "Outros"),
+        ]
+    )
+    pago_field = ft.Checkbox(label="Pago", value=transacao.transacao_pago)
+    observacao_field = ft.TextField(label="Observação", width=400, value=transacao.transacao_observacao or "")
+    local_field = ft.TextField(label="Local", width=400, value=transacao.transacao_local or "")
+    dt_vencimento_field = ft.TextField(label="Data de Vencimento (AAAA-MM-DD)", width=400,
+                                       value=str(transacao.transacao_dt_vencimento or "")[:10])
+
     mensagem = ft.Text(color="green")
 
     def to_float(value):
@@ -374,25 +391,40 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
     def voltar_click(e):
         page.go("/transacao/listar")
 
+    # --- SALVAR ALTERAÇÕES ---
     def salvar_click(e):
-        nome = nome_field.value.strip()
-        # tipo = tipo_field.value
-        # saldo_inicial = to_float(saldo_inicial_field.value)
-        # saldo_disponivel = to_float(saldo_disponivel_field.value)
-        # ativo = ativo_field.value
+        descricao = descricao_field.value.strip()
+        valor = to_float(valor_field.value)
+        tipo = tipo_field.value
+        modo = modo_field.value
+        pago = pago_field.value
+        observacao = observacao_field.value.strip()
+        local = local_field.value.strip()
+        dt_vencimento = dt_vencimento_field.value.strip()
 
-        ok, msg = controller.update_transacao(transacao_id, nome)
+        ok, msg = controller.update_transacao(
+            transacao_id=transacao_id,
+            descricao=descricao,
+            valor=valor,
+            tipo=tipo,
+            modo=modo,
+            pago=pago,
+            observacao=observacao,
+            local=local,
+            dt_vencimento=dt_vencimento
+        )
         mensagem.value = msg
         mensagem.color = "green" if ok else "red"
         page.update()
 
+    # --- EXCLUIR TRANSACAO ---
     def excluir_click(e):
         def confirmar_excluir(ev):
             ok, msg = controller.delete_transacao(transacao_id)
             bs.open = False
             page.update()
             if ok:
-                page.snack_bar = ft.SnackBar(ft.Text("transacao excluída com sucesso!"))
+                page.snack_bar = ft.SnackBar(ft.Text("Transação excluída com sucesso!"))
                 page.snack_bar.open = True
                 page.go("/transacao/listar")
             else:
@@ -404,7 +436,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             ft.Container(
                 ft.Column([
                     ft.Text("Confirmar exclusão", weight="bold", size=18),
-                    ft.Text("Tem certeza que deseja excluir esta transacao? Esta ação é irreversível."),
+                    ft.Text("Tem certeza que deseja excluir esta transação? Esta ação é irreversível."),
                     ft.Row([
                         ft.TextButton("Cancelar", on_click=lambda ev: (setattr(bs, "open", False), page.update())),
                         ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
@@ -417,6 +449,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
         page.overlay.append(bs)
         page.update()
 
+    # --- VIEW FINAL ---
     return ft.View(
         route=f"/transacao/detalhar/{transacao_id}",
         controls=[
@@ -428,17 +461,22 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
                             controls=[
                                 ft.Row([
                                     ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
-                                    ft.Text("Detalhes da transação", size=26, weight="bold", color="#1E3D59"),
+                                    ft.Text("Detalhes da Transação", size=26, weight="bold", color="#1E3D59"),
                                 ]),
                                 ft.Divider(),
-                                nome_field,
-                                # tipo_field,
-                                # saldo_inicial_field,
-                                # saldo_disponivel_field,
-                                # ativo_field,
+                                descricao_field,
+                                valor_field,
+                                tipo_field,
+                                modo_field,
+                                pago_field,
+                                observacao_field,
+                                local_field,
+                                dt_vencimento_field,
                                 ft.Row([
-                                    ft.ElevatedButton(text="Salvar Alterações", icon=ft.Icons.SAVE, bgcolor="#44CFA1", color="white", on_click=salvar_click),
-                                    ft.ElevatedButton(text="Excluir transação", icon=ft.Icons.DELETE, bgcolor="#F28B82", color="white", on_click=excluir_click),
+                                    ft.ElevatedButton(text="Salvar Alterações", icon=ft.Icons.SAVE, bgcolor="#44CFA1",
+                                                      color="white", on_click=salvar_click),
+                                    ft.ElevatedButton(text="Excluir Transação", icon=ft.Icons.DELETE, bgcolor="#F28B82",
+                                                      color="white", on_click=excluir_click),
                                 ], spacing=15),
                                 mensagem,
                             ],
