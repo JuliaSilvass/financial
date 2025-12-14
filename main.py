@@ -30,10 +30,13 @@ from database.connection_db import test_connection
 # Função principal
 # -------------------------------------------------------------
 def main(page: ft.Page):
-    page.title = "Financial"
+    page.title = "O financeiro"
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    # Tela cheia
+    page.window.resizable = True
+    page.window.maximized = True
+    page.padding = 0
 
     # Testa conexão com o banco (só na inicialização)
     test_connection()
@@ -81,7 +84,6 @@ def main(page: ft.Page):
             page.update()
             return
         
-        # Rota dinâmica: /transacao/detalhar/{id}
         # Rota dinâmica: /transacao/detalhar/{id}
         if route.startswith("/transacao/detalhar/"):
             try:

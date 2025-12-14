@@ -1,7 +1,6 @@
 import flet as ft
 
 def home_page(page: ft.Page):
-    page.clean()
 
     def login_click(e):
         page.go("/login")
@@ -41,8 +40,8 @@ def home_page(page: ft.Page):
         controls=[
             ft.Column(
                 controls=[
-                    ft.Text("Bem vindo ao Financial!", theme_style="displayMedium", size=50, weight="bold", color="#44CFA1", no_wrap=False),
-                    ft.Text("Aqui você pode gerenciar sua vida financeira e acompanhar o andamento de suas finanças.", size=25, no_wrap=False),
+                    ft.Text("Bem vindo ao Financeiro!", theme_style="displayMedium", size=50, weight="bold", color="#44CFA1", no_wrap=False),
+                    ft.Text("Aqui você pode gerenciar e acompanhar sua vida financeira.", size=25, no_wrap=False),
                     ft.Divider(),
                     ft.Text("Para começar, faça login ou registre-se.", size=25),
                     ft.Row(
