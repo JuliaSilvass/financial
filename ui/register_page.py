@@ -13,9 +13,54 @@ def register_page(page: ft.Page):
     check_special = ft.Text("• Caractere especial", color="red")
     check_match = ft.Text("• Senhas coincidem", color="red")
 
+    password_valid = False
+    passwords_match = False
+    password_focus_count = 0
+
+
     controller = UserController()
 
+    def on_password_focus(e):
+        nonlocal password_focus_count
+        password_focus_count += 1
+        password_rules_box.visible = True
+        page.update()
+
+    def on_password_blur(e):
+        nonlocal password_focus_count
+        password_focus_count -= 1
+
+        if password_focus_count <= 0:
+            password_rules_box.visible = False
+            password_focus_count = 0
+
+        page.update()
+
+
+    def show_password_rules(e):
+        password_rules_box.visible = True
+        page.update()
+
+    def hide_password_rules(e):
+        password_rules_box.visible = False
+        page.update()
+
+    def update_register_button_state():
+        nonlocal password_valid, passwords_match
+
+        name_ok = txt_user.value and len(txt_user.value.strip()) >= 3
+        email_ok = txt_email.value and "@" in txt_email.value
+
+        btn_register.disabled = not (
+            name_ok and email_ok and password_valid and passwords_match
+        )
+
+        page.update()
+
+
     def update_password_checks(password: str):
+        nonlocal password_valid
+
         rules = validate_password(password)
 
         check_length.color = "green" if rules["length"] else "red"
@@ -24,31 +69,46 @@ def register_page(page: ft.Page):
         check_number.color = "green" if rules["number"] else "red"
         check_special.color = "green" if rules["special"] else "red"
 
-        page.update()
+        password_valid = rules["valid"]
+
+        check_password_match()
+        update_register_button_state()
+
     
     def check_password_match(e=None):
+        nonlocal passwords_match
+
         if txt_pass.value and txt_pass.value == txt_pass_confirm.value:
             check_match.color = "green"
+            passwords_match = True
         else:
             check_match.color = "red"
-        page.update()
+            passwords_match = False
+
+        update_register_button_state()
+
 
     # Campos de cadastro
-    txt_user = ft.TextField(label="Nome", width=300)
-    txt_email = ft.TextField(label="Email", width=300)
+    txt_user = ft.TextField(label="Nome", width=300, on_change=lambda e: update_register_button_state())
+    txt_email = ft.TextField(label="Email", width=300, on_change=lambda e: update_register_button_state())
     txt_pass = ft.TextField(
         label="Senha",
         password=True,
         width=300,
         on_change=lambda e: update_password_checks(e.control.value),
+        on_focus=show_password_rules,
+        on_blur=hide_password_rules,
     )
     txt_pass_confirm = ft.TextField(
         label="Confirmar Senha",
         password=True,
         width=300,
         on_change=check_password_match,
+        on_focus=on_password_focus,
+        on_blur=on_password_blur,
     )
     password_rules_box = ft.Container(
+        visible=False,
         content=ft.Column(
             controls=[
                 check_length,
@@ -100,13 +160,20 @@ def register_page(page: ft.Page):
     # Botão de registrar
     btn_register = ft.ElevatedButton(
         text="Registrar",
+        disabled=True,
         style=ft.ButtonStyle(
-            bgcolor={"": "#44CFA1"},
-            color={"": "white"},
+            bgcolor={
+                "": "#44CFA1",                
+                "disabled": "#BFE9DA",       
+            },
+            color={
+                "": "white",
+                "disabled": "#EEEEEE",       
+            },
             padding=20,
             shape=ft.RoundedRectangleBorder(radius=10),
         ),
-        on_click=register_click
+        on_click=register_click,
     )
 
     # Botão de Voltar para Home
