@@ -16,12 +16,14 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     """Verifica se a senha corresponde ao hash."""
-
-    # transformando a senha e o hash em bytes
-    password = password.encode('utf-8')
-    hashed = hashed.encode('utf-8')
-
-    return bcrypt.checkpw(password, hashed)
+    try:
+        return bcrypt.checkpw(
+            password.encode("utf-8"),
+            hashed.encode("utf-8")
+        )
+    except ValueError:
+        # hash inválido
+        return False
 
 def validate_password(password: str) -> dict:
     rules = {
