@@ -2,7 +2,7 @@ import flet as ft
 from services.session_manager import SessionManager
 from controllers.ambiente_controller import AmbienteController
 from utils.sidebar import build_sidebar
-
+from utils.dialogs import show_confirm_dialog, show_alert
 
 # ==========================================================
 # Sidebar 
@@ -58,7 +58,6 @@ def ambiente_listar_page(page: ft.Page):
                         padding=ft.padding.symmetric(vertical=10, horizontal=15),
                         border_radius=8,
                         bgcolor="#F1F8E9",
-                        hover_color="#C8E6C9",
                         on_click=lambda e, a_id=amb.ambiente_id: page.go(
                             f"/ambiente/detalhar/{a_id}"
                         ),
@@ -248,13 +247,20 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
         page.update()
 
     def excluir_click(e):
-        ok, msg = controller.delete_ambiente(ambiente_id)
-        if ok:
-            page.go("/ambiente/listar")
-        else:
-            mensagem.value = msg
-            mensagem.color = "red"
-        page.update()
+
+        def confirmar_exclusao():
+            ok, msg = controller.delete_ambiente(ambiente_id)
+            if ok:
+                page.go("/ambiente/listar")
+            else:
+                show_alert(page, "Erro", msg)
+        
+        show_confirm_dialog(
+            page, 
+            title="Confirmar Exclusão",
+            message="Tem certeza que deseja excluir este ambiente? Esta ação não pode ser desfeita.",
+            on_confirm=confirmar_exclusao
+        )
 
     return ft.View(
         route=f"/ambiente/detalhar/{ambiente_id}",
@@ -302,15 +308,14 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
                                             color="white",
                                             on_click=salvar_click,
                                         ),
-                                        ft.ElevatedButton(
+                                        ft.OutlinedButton(
                                             "Excluir Ambiente",
                                             icon=ft.Icons.DELETE,
-                                            bgcolor="#F28B82",
-                                            color="white",
                                             on_click=excluir_click,
                                         ),
                                     ],
                                     spacing=15,
+                                    alignment=ft.MainAxisAlignment.CENTER,
                                 ),
                                 mensagem,
                             ],

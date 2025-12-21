@@ -14,7 +14,7 @@ class Ambiente(Base):
 
     def __init__(self, nome=None, descricao=None, usuario_id=None):
         self.ambiente_nome = nome
-        self.amebiente_descricao = descricao
+        self.ambiente_descricao = descricao
         self.usuario_id = usuario_id
 
     def __repr__(self):
