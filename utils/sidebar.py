@@ -2,32 +2,15 @@
 import flet as ft
 from services.session_manager import SessionManager
 
-
-def build_sidebar(
-    page: ft.Page,
-    user: dict,
-    menu_items: list,
-    active_route: str = ""
-):
-    """
-    menu_items = [
-        {
-            "label": "Ambientes",
-            "icon": ft.Icons.HOME,
-            "route": "/ambiente/listar"
-        },
-        ...
-    ]
-    """
-
+def build_sidebar(page: ft.Page, user: dict, menu_items: list, active_route: str = ""):
     def logout_click(e):
         SessionManager.logout()
         page.go("/")
 
     buttons = []
-
     for item in menu_items:
-        is_active = active_route == item["route"]
+        route = item["route"]
+        is_active = (active_route == route)
 
         buttons.append(
             ft.Container(
@@ -35,8 +18,8 @@ def build_sidebar(
                 content=ft.ElevatedButton(
                     text=item["label"],
                     icon=item.get("icon"),
-                    on_click=None if is_active else (lambda e, r=item["route"]: page.go(r)),
-                    disabled=is_active,
+                    disabled=is_active,  # 👈 só desabilita o ativo
+                    on_click=None if is_active else (lambda e, r=route: page.go(r)),
                     style=ft.ButtonStyle(
                         bgcolor={
                             "": "#44CFA1" if is_active else "#B2DFDB",
@@ -47,6 +30,7 @@ def build_sidebar(
                         },
                         padding=ft.padding.symmetric(vertical=14),
                         shape=ft.RoundedRectangleBorder(radius=8),
+                        overlay_color="#38A08B",
                     ),
                 ),
             )
