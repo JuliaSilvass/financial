@@ -18,15 +18,15 @@ def build_sidebar(page: ft.Page, user: dict, menu_items: list, active_route: str
                 content=ft.ElevatedButton(
                     text=item["label"],
                     icon=item.get("icon"),
-                    disabled=is_active,  # 👈 só desabilita o ativo
+                    disabled=is_active,
                     on_click=None if is_active else (lambda e, r=route: page.go(r)),
                     style=ft.ButtonStyle(
                         bgcolor={
-                            "": "#44CFA1" if is_active else "#B2DFDB",
+                            "": "#38A08B" if is_active else "#B2DFDB",
                             "hovered": "#3AB08F",
                         },
                         color={
-                            "": "white" if is_active else "#1E3D59",
+                            "": "#1E3D59",
                         },
                         padding=ft.padding.symmetric(vertical=14),
                         shape=ft.RoundedRectangleBorder(radius=8),
