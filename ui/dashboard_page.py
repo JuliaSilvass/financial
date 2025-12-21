@@ -1,5 +1,6 @@
 import flet as ft
 from services.session_manager import SessionManager
+from utils.sidebar import build_sidebar
 
 def dashboard_page(page: ft.Page):
     if not SessionManager.is_logged_in():
@@ -9,58 +10,26 @@ def dashboard_page(page: ft.Page):
     user = SessionManager.get_current_user()
 
     # -----------------------------
-    # Ações
-    # -----------------------------
-    def logout_click(e):
-        SessionManager.logout()
-        page.go("/")
-
-    def navigate(area):
-        if area == "Ambientes Financeiros":
-            page.go("/ambiente/listar")
-        elif area == "Categorias":
-            page.go("/categoria/listar")
-        elif area == "Contas":
-            page.go("/conta/listar")
-        elif area == "Transações":
-            page.go("/transacao/listar")
-        else:
-            page.snack_bar = ft.SnackBar(ft.Text(f"Navegando para: {area}"))
-            page.snack_bar.open = True
-            page.update()
-
-    # -----------------------------
     # Menu
     # -----------------------------
     menu_items = [
-        "Ambientes Financeiros",
-        "Transações",
-        "Metas",
-        "Categorias",
-        "Contas",
-        "Relatórios",
-        "Compartilhamento",
-        "Perfil Financeiro",
-        "Configurações"
+        {"label": "Ambientes Financeiros", "route": "/ambiente/listar"},
+        {"label": "Transações", "route": "/transacao/listar"},
+        {"label": "Metas", "route": "/meta/listar"},
+        {"label": "Categorias", "route": "/categoria/listar"},
+        {"label": "Contas", "route": "/conta/listar"},
+        {"label": "Relatórios", "route": "/relatorio"},
+        {"label": "Compartilhamento", "route": "/compartilhamento"},
+        {"label": "Perfil financeiro", "route": "/perfil"},
+        {"label": "Configurações", "route": "/configuracao"},
     ]
 
-    menu_buttons = [
-        ft.Container(
-            width=float("inf"),
-            content=ft.ElevatedButton(
-                text=item,
-                on_click=lambda e, a=item: navigate(a),
-                style=ft.ButtonStyle(
-                    bgcolor={"": "#44CFA1", "hovered": "#3AB08F"},
-                    color={"": "white"},
-                    padding=ft.padding.symmetric(vertical=14),
-                    shape=ft.RoundedRectangleBorder(radius=8),
-                    overlay_color="#38A08B",
-                ),
-            ),
-        )
-        for item in menu_items
-    ]
+    sidebar = build_sidebar(
+                page=page,
+                user=user,
+                menu_items=menu_items,
+                active_route="/dashboard"
+            )
 
     # -----------------------------
     # VIEW
@@ -77,44 +46,7 @@ def dashboard_page(page: ft.Page):
                     # -----------------------------
                     # SIDEBAR
                     # -----------------------------
-                    ft.Container(
-                        width=230,
-                        padding=ft.padding.all(15),
-                        bgcolor="#E0F7FA",
-                        border_radius=10,
-                        shadow=ft.BoxShadow(blur_radius=8, color="#C8E6C9"),
-                        content=ft.Column(
-                            expand=True,  
-                            spacing=12,
-                            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
-                            controls=[
-                                ft.Text(
-                                    f"Olá, {user['nome']}",
-                                    size=20,
-                                    weight="bold",
-                                    color="#1E3D59",
-                                ),
-
-                                ft.Divider(height=2, thickness=1, color="#44CFA1"),
-
-                                *menu_buttons,
-                                
-                                ft.Container(expand=True),
-
-                                ft.ElevatedButton(
-                                    "Logout",
-                                    bgcolor="#F28B82",
-                                    color="white",
-                                    on_click=logout_click,
-                                    style=ft.ButtonStyle(
-                                        padding=ft.padding.symmetric(vertical=12),
-                                        shape=ft.RoundedRectangleBorder(radius=8),
-                                        overlay_color="#E57373",
-                                    ),
-                                ),
-                            ],
-                        ),
-                    ),
+                    sidebar,
 
                     # -----------------------------
                     # ÁREA PRINCIPAL

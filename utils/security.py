@@ -2,7 +2,7 @@ import bcrypt
 import re
 
 def hash_password(password: str) -> str:
-    """"Senha hash usando bcrypt."""
+    """Senha hash usando bcrypt."""
 
     # tranformando a senha em bytes
     password = password.encode('utf-8')
