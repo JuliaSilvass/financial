@@ -12,20 +12,34 @@ class AmbienteServices:
     # Aqui o método para criar ambiente
     def create_ambiente(self, nome: str, descricao: str, usuario_id: int):
         try:
+            ambiente_existente = (
+                self.db.query(Ambiente)
+                .filter(
+                    Ambiente.ambiente_nome.ilike(nome), 
+                    Ambiente.usuario_id == usuario_id
+                )
+                .first()
+            )
+            if ambiente_existente:
+                return False, "Já existe um ambiente com esse nome."
+            
             novo_ambiente = Ambiente(
                 nome=nome,
                 descricao=descricao,
                 usuario_id=usuario_id
             )
+
             self.db.add(novo_ambiente)
             self.db.commit()
             self.db.refresh(novo_ambiente)
+
             logging.info(f"Ambiente '{nome}' criado com sucesso (ID={novo_ambiente.ambiente_id})")
             return True, f"Ambiente '{nome}' criado com sucesso!"
         except Exception as e:
             self.db.rollback()
             logging.error(f"Erro ao criar ambiente: {e}")
             return False, f"Erro ao criar ambiente: {str(e)}"
+        
         finally:
             self.db.close()
 
@@ -60,18 +74,40 @@ class AmbienteServices:
     # altera ambiente 
     def update_ambiente(self, ambiente_id: int, nome: str, descricao: str):
         try:
-            ambiente = self.db.query(Ambiente).filter(Ambiente.ambiente_id == ambiente_id).first()
+
+            ambiente = (
+                self.db.query(Ambiente)
+                .filter(Ambiente.ambiente_id == ambiente_id)
+                .first()
+            )
+
             if not ambiente:
                 return False, "Ambiente não encontrado."
+            
+            ambiente_existente = (
+                self.db.query(Ambiente)
+                .filter(
+                    Ambiente.usuario_id == ambiente.usuario_id,
+                    Ambiente.ambiente_nome.ilike(nome),
+                    Ambiente.ambiente_id != ambiente_id
+                )
+                .first()
+            )
+
+            if ambiente_existente:
+                return False, "Já existe outro ambiente com esse nome."
 
             ambiente.ambiente_nome = nome
             ambiente.ambiente_descricao = descricao
+
             self.db.commit()
             return True, "Ambiente atualizado com sucesso!"
+
         except Exception as e:
             self.db.rollback()
             logging.error(f"Erro ao atualizar ambiente: {e}")
             return False, f"Erro: {e}"
+
         finally:
             self.db.close()
 
