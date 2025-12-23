@@ -139,15 +139,20 @@ def ambiente_cadastrar_page(page: ft.Page):
         descricao = desc_field.value.strip()
 
         if not nome:
-            mensagem.value = "⚠️ O nome do ambiente é obrigatório."
-            mensagem.color = "red"
-        else:
-            ok, msg = controller.register_ambiente(nome, descricao, user["id"])
-            mensagem.value = msg
-            mensagem.color = "green" if ok else "red"
+            show_alert(
+                page,
+                "Campo obrigatório",
+                "O nome do ambiente é obrigatório."
+            )
+            return
+        
+        ok, msg = controller.register_ambiente(nome, descricao, user["id"])
 
-            if ok:
-                page.go("/ambiente/listar")
+        if ok:
+            page.go("/ambiente/listar")
+        else:
+            show_alert(page, "Erro ao salvar", msg)
+        
         page.update()
 
     return ft.View(
@@ -239,12 +244,23 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
         page.go("/ambiente/listar")
 
     def salvar_click(e):
-        ok, msg = controller.update_ambiente(
-            ambiente_id, nome_field.value.strip(), desc_field.value.strip()
-        )
-        mensagem.value = msg
-        mensagem.color = "green" if ok else "red"
-        page.update()
+        nome = nome_field.value.strip()
+        descricao = desc_field.value.strip()
+        
+        if not nome:
+            show_alert(
+                page,
+                "Campo obrigatório",
+                "O nome do ambiente é obrigatório."
+            )
+            return
+
+        ok, msg = controller.update_ambiente(ambiente_id, nome, descricao)
+
+        if ok:
+            show_alert(page, "Sucesso", msg)
+        else:
+            show_alert(page, "Erro", msg)
 
     def excluir_click(e):
 
