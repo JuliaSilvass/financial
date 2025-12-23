@@ -3,6 +3,8 @@ from services.session_manager import SessionManager
 from controllers.ambiente_controller import AmbienteController
 from utils.sidebar import build_sidebar
 from utils.dialogs import show_confirm_dialog, show_alert
+from utils.list_page import build_list_page
+from utils.search_bar import build_search_bar
 
 # ==========================================================
 # Sidebar 
@@ -30,42 +32,74 @@ def ambiente_listar_page(page: ft.Page):
 
     user = SessionManager.get_current_user()
     controller = AmbienteController()
-    tabela = ft.Column(spacing=10)
 
     sidebar = ambiente_sidebar(page, user, "/ambiente/listar")
 
-    def voltar_click(e):
-        page.go("/dashboard")
+    ambientes = controller.listar_ambientes(user["id"])
+    columns = [
+        {"label": "Nome", "field": "ambiente_nome", "width": 200},
+        {"label": "Descrição", "field": "ambiente_descricao", "width": 250},
+        {
+            "label": "Criado em",
+            "field": "ambiente_dt_criacao",
+            "width": 160,
+            "type": "date",
+        },
+    ]
 
-    def carregar_lista():
+    def on_click(amb):
+        page.go(f"/ambiente/detalhar/{amb.ambiente_id}")
+
+    # --------------------------------------------------
+    # Tabela (variável que será atualizada)
+    # --------------------------------------------------
+    tabela = build_list_page(
+        items=ambientes,
+        columns=columns,
+        on_item_click=on_click,
+    )
+
+    # --------------------------------------------------
+    # Busca
+    # --------------------------------------------------
+    def on_search(texto):
+        texto = texto.lower()
+
+        filtrados = [
+            amb for amb in ambientes
+            if texto in amb.ambiente_nome.lower()
+            or (amb.ambiente_descricao and texto in amb.ambiente_descricao.lower())
+        ]
+
+        nova_tabela = build_list_page(
+            items=filtrados,
+            columns=columns,
+            on_item_click=on_click,
+            search_bar=search_bar,  # mantém a barra
+        )
+
         tabela.controls.clear()
-        ambientes = controller.listar_ambientes(user["id"])
-
-        if not ambientes:
-            tabela.controls.append(ft.Text("Nenhum ambiente encontrado.", color="gray"))
-        else:
-            for amb in ambientes:
-                tabela.controls.append(
-                    ft.Container(
-                        content=ft.Row(
-                            [
-                                ft.Text(amb.ambiente_nome, width=200, weight="bold"),
-                                ft.Text(amb.ambiente_descricao or "-", width=250),
-                                ft.Text(str(amb.ambiente_dt_criacao)[:16], width=160),
-                            ],
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        ),
-                        padding=ft.padding.symmetric(vertical=10, horizontal=15),
-                        border_radius=8,
-                        bgcolor="#F1F8E9",
-                        on_click=lambda e, a_id=amb.ambiente_id: page.go(
-                            f"/ambiente/detalhar/{a_id}"
-                        ),
-                    )
-                )
+        tabela.controls.extend(nova_tabela.controls)
         page.update()
 
-    carregar_lista()
+    search_bar = build_search_bar(
+        hint_text="Pesquisar ambientes...",
+        on_change=on_search,
+    )
+
+    # --------------------------------------------------
+    # Recria tabela com search bar
+    # --------------------------------------------------
+    tabela = build_list_page(
+        items=ambientes,
+        columns=columns,
+        on_item_click=on_click,
+        search_bar=search_bar,
+    )
+
+
+    def voltar_click(e):
+        page.go("/dashboard")
 
     return ft.View(
         route="/ambiente/listar",
@@ -86,8 +120,6 @@ def ambiente_listar_page(page: ft.Page):
                         content=ft.Column(
                             expand=True,
                             spacing=15,
-                            alignment=ft.MainAxisAlignment.START,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             controls=[
                                 ft.Row(
                                     [
@@ -98,7 +130,7 @@ def ambiente_listar_page(page: ft.Page):
                                         ),
                                         ft.Text(
                                             "Ambientes Cadastrados",
-                                            size=26,
+                                            size=26, 
                                             weight="bold",
                                         ),
                                     ]
@@ -112,6 +144,7 @@ def ambiente_listar_page(page: ft.Page):
             )
         ],
     )
+
 
 
 # ==========================================================
