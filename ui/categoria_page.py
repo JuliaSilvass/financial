@@ -286,46 +286,24 @@ def categoria_detalhar_page(page: ft.Page, categoria_id: int):
             show_alert(page, "Sucesso", msg)
         else:
             show_alert(page, "Erro", msg)
-            
+
         page.update()
 
     def excluir_click(e):
-        def confirmar_excluir(ev):
+        def confirmar_excluir():
             ok, msg = controller.delete_categoria(categoria_id)
-            bs.open = False
             page.update()
             if ok:
-                page.snack_bar = ft.SnackBar(ft.Text("Categoria excluída com sucesso!"))
-                page.snack_bar.open = True
                 page.go("/categoria/listar")
             else:
-                page.snack_bar = ft.SnackBar(ft.Text(f"Erro: {msg}"))
-                page.snack_bar.open = True
-            page.update()
+                show_alert(page, "Erro", msg)
 
-        bs = ft.BottomSheet(
-            ft.Container(
-                ft.Column(
-                    [
-                        ft.Text("Confirmar exclusão", weight="bold", size=18),
-                        ft.Text("Tem certeza que deseja excluir esta categoria? Esta ação é irreversível."),
-                        ft.Row(
-                            [
-                                ft.TextButton("Cancelar", on_click=lambda ev: (setattr(bs, "open", False), page.update())),
-                                ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
-                            ],
-                            alignment=ft.MainAxisAlignment.END
-                        )
-                    ],
-                    tight=True,
-                    spacing=10
-                ),
-                padding=20,
-            ),
-            open=True,
+        show_confirm_dialog(
+            page, 
+            title="Confirmar Exclusão",
+            message="Tem certeza que deseja excluir essa categoria? Esta ação não pode ser desfeita.",
+            on_confirm=confirmar_excluir
         )
-        page.overlay.append(bs)
-        page.update()
 
 
     return ft.View(
@@ -355,15 +333,14 @@ def categoria_detalhar_page(page: ft.Page, categoria_id: int):
                                             color="white",
                                             on_click=salvar_click,
                                         ),
-                                        ft.ElevatedButton(
-                                            text="Excluir Categoria",
+                                        ft.OutlinedButton(
+                                            "Excluir Categoria",
                                             icon=ft.Icons.DELETE,
-                                            bgcolor="#F28B82",
-                                            color="white",
                                             on_click=excluir_click,
                                         ),
                                     ],
                                     spacing=15,
+                                    alignment=ft.MainAxisAlignment.CENTER,
                                 ),
                                 mensagem,
                             ],
