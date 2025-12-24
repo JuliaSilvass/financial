@@ -12,6 +12,18 @@ class CategoriaServices:
     # Aqui o método para criar ambiente
     def create_Categoria(self, nome: str, usuario_id: int):
         try:
+            categoria_existente = (
+                self.db.query(Categoria)
+                .filter(
+                    Categoria.usuario_id == usuario_id,
+                    Categoria.categoria_nome.ilike(nome)
+                )
+                .first()
+            )
+
+            if categoria_existente:
+                return False, "Já existe uma categoria com esse nome."
+
             novo_categoria = Categoria(
                 nome=nome,
                 usuario_id=usuario_id
@@ -57,8 +69,20 @@ class CategoriaServices:
             self.db.close()
 
     # altera categoria 
-    def update_categoria(self, categoria_id: int, nome: str):
+    def update_categoria(self, categoria_id: int, nome: str, usuario_id: int):
         try:
+            categoria_existente = (
+                self.db.query(Categoria)
+                .filter(
+                    Categoria.usuario_id == usuario_id,
+                    Categoria.categoria_nome.ilike(nome)
+                )
+                .first()
+            )
+
+            if categoria_existente:
+                return False, "Já existe uma categoria com esse nome."
+
             categoria = self.db.query(Categoria).filter(Categoria.categoria_id == categoria_id).first()
             if not categoria:
                 return False, "categoria não encontrada."

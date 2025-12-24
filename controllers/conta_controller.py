@@ -1,7 +1,5 @@
 import logging
-from models.conta import Conta
 from services.conta_service import ContaService 
-from services.session_manager import SessionManager
 
 class ContaController:
     def __init__(self):

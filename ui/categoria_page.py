@@ -261,10 +261,10 @@ def categoria_detalhar_page(page: ft.Page, categoria_id: int):
     mensagem = ft.Text(color="green")
 
     def voltar_click(e):
-        page.go("/ambiente/listar")
+        page.go("/categoria/listar")
 
     def salvar_click(e):
-        ok, msg = controller.update_categoria(categoria_id, nome_field.value.strip())
+        ok, msg = controller.update_categoria(categoria_id, nome_field.value.strip(), user["id"])
         mensagem.value = msg
         mensagem.color = "green" if ok else "red"
         page.update()

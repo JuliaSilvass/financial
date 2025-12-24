@@ -35,8 +35,8 @@ class CategoriaController:
     def get_categoria(self, categoria_id):
         return self.service.get_categoria_by_id(categoria_id)
 
-    def update_categoria(self, categoria_id, nome):
-        return self.service.update_categoria(categoria_id, nome)
+    def update_categoria(self, categoria_id, nome, usuario_id):
+        return self.service.update_categoria(categoria_id, nome, usuario_id)
 
     def delete_categoria(self, categoria_id):
         return self.service.delete_categoria(categoria_id)
