@@ -1,6 +1,10 @@
 import flet as ft
 from services.session_manager import SessionManager
 from controllers.categoria_controller import CategoriaController
+from utils.sidebar import build_sidebar
+from utils.dialogs import show_confirm_dialog, show_alert
+from utils.list_page import build_list_page
+from utils.search_bar import build_search_bar
 
 # ----------------------------------------------------------
 # Barra lateral padrão
@@ -158,7 +162,7 @@ def categoria_cadastrar_page(page: ft.Page):
     controller = CategoriaController()
 
     nome_field = ft.TextField(label="Nome da categoria", width=400)
-    mensagem = ft.Text(color="green")
+    mensagem = ft.Text()
 
     def voltar_click(e):
         page.go("/categoria/listar")
@@ -167,20 +171,19 @@ def categoria_cadastrar_page(page: ft.Page):
         nome = nome_field.value.strip()
 
         if not nome:
-            mensagem.value = "O nome da categoria é obrigatório."
-            mensagem.color = "red"
-        else:
-            ok, msg = controller.register_categoria(nome, user["id"])
-            mensagem.value = msg
-            mensagem.color = "green" if ok else "red"
+            show_alert(
+                page, 
+                "Campo obrigatório", 
+                "O nome da categoria é obrigatório."
+            )
+            return
+        
+        ok, msg = controller.register_categoria(nome, user["id"])
 
-            if ok:
-                nome_field.value = ""
-                page.snack_bar = ft.SnackBar(ft.Text("Categoria cadastrada com sucesso!"))
-                page.snack_bar.open = True
-                page.update()
-                page.go("/categoria/listar")
-                return
+        if ok: 
+            page.go("/categoria/listar")
+        else:  
+            show_alert(page, "Erro ao salvar", msg)
         page.update()
 
     return ft.View(
@@ -252,21 +255,38 @@ def categoria_detalhar_page(page: ft.Page, categoria_id: int):
     categoria = controller.get_categoria(categoria_id)
 
     if not categoria:
-        page.snack_bar = ft.SnackBar(ft.Text("Categoria não encontrada."))
-        page.snack_bar.open = True
+        show_alert(
+                page, 
+                "Categoria não encontrada", 
+                "Categoria não encontrada."
+            )
         page.go("/categoria/listar")
         return
 
     nome_field = ft.TextField(label="Nome da categoria", width=400, value=categoria.categoria_nome)
-    mensagem = ft.Text(color="green")
+    mensagem = ft.Text()
 
     def voltar_click(e):
         page.go("/categoria/listar")
 
     def salvar_click(e):
-        ok, msg = controller.update_categoria(categoria_id, nome_field.value.strip(), user["id"])
-        mensagem.value = msg
-        mensagem.color = "green" if ok else "red"
+        nome = nome_field.value.strip()
+
+        if not nome: 
+            show_alert(
+                page, 
+                "Campo obrigatório", 
+                "O nome da categoria é obrigatório."
+            )
+            return    
+
+        ok, msg = controller.update_categoria(categoria_id, nome, user["id"])
+
+        if ok:
+            show_alert(page, "Sucesso", msg)
+        else:
+            show_alert(page, "Erro", msg)
+            
         page.update()
 
     def excluir_click(e):

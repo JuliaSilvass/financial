@@ -255,6 +255,11 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
     ambiente = controller.get_ambiente(ambiente_id)
 
     if not ambiente:
+        show_alert(
+            page, 
+            "Ambiente não encontrado", 
+            "Ambiente não encontrado."
+        )
         page.go("/ambiente/listar")
         return
 
