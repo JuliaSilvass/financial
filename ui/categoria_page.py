@@ -6,64 +6,20 @@ from utils.dialogs import show_confirm_dialog, show_alert
 from utils.list_page import build_list_page
 from utils.search_bar import build_search_bar
 
-# ----------------------------------------------------------
-# Barra lateral padrão
-# ----------------------------------------------------------
-def barra_lateral(user, page, current_page):
-    def go_to_listar(e):
-        if current_page != "listar":
-            page.go("/categoria/listar")
 
-    def go_to_cadastrar(e):
-        if current_page != "cadastrar":
-            page.go("/categoria/cadastrar")
-
-    def logout_click(e):
-        SessionManager.logout()
-        page.go("/")
-
-    return ft.Container(
-        content=ft.Column(
-            controls=[
-                ft.Container(
-                    content=ft.Text(f"Olá, {user['nome']}", size=20, weight="bold", color="#1E3D59"),
-                    padding=ft.padding.only(bottom=10)
-                ),
-                ft.Divider(height=2, thickness=1, color="#44CFA1"),
-                ft.ElevatedButton(
-                    text="Listar categorias",
-                    icon=ft.Icons.LIST,
-                    bgcolor="#44CFA1" if current_page == "listar" else "#B2DFDB",
-                    color="white" if current_page == "listar" else "#1E3D59",
-                    on_click=go_to_listar if current_page != "listar" else None,
-                    disabled=current_page == "listar",
-                    expand=True
-                ),
-                ft.ElevatedButton(
-                    text="Cadastrar nova categoria",
-                    icon=ft.Icons.ADD,
-                    bgcolor="#44CFA1" if current_page == "cadastrar" else "#B2DFDB",
-                    color="white" if current_page == "cadastrar" else "#1E3D59",
-                    on_click=go_to_cadastrar if current_page != "cadastrar" else None,
-                    disabled=current_page == "cadastrar",
-                    expand=True
-                ),
-                ft.Divider(height=2, thickness=1, color="#44CFA1"),
-                ft.ElevatedButton(
-                    text="Logout",
-                    bgcolor="#F28B82",
-                    color="white",
-                    on_click=logout_click,
-                )
-            ],
-            spacing=15,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER
-        ),
-        width=230,
-        padding=ft.padding.all(15),
-        bgcolor="#E0F7FA",
-        border_radius=10,
-        shadow=ft.BoxShadow(blur_radius=8, color="#C8E6C9")
+# ==========================================================
+# Sidebar 
+# ==========================================================
+def categoria_sidebar(page, user, active_route:str):
+    menu_items = [
+        {"label": "Listar categorias", "route": "/categoria/listar", "icon": ft.Icons.LIST},
+        {"label": "Cadastrar categoria", "route": "/categoria/cadastrar", "icon": ft.Icons.ADD},
+    ]
+    return build_sidebar(
+        page=page,
+        user=user,
+        menu_items=menu_items,
+        active_route=active_route
     )
 
 
@@ -77,6 +33,9 @@ def categoria_listar_page(page: ft.Page):
 
     user = SessionManager.get_current_user()
     controller = CategoriaController()
+
+    sidebar  = categoria_sidebar(page, user, "/categoria/listar")
+
     tabela = ft.Column(spacing=10)
 
     def voltar_click(e):
@@ -113,7 +72,7 @@ def categoria_listar_page(page: ft.Page):
         controls=[
             ft.Row(
                 controls=[
-                    barra_lateral(user, page, "listar"),
+                    sidebar,
                     ft.Container(
                         content=ft.Column(
                             controls=[
@@ -161,6 +120,8 @@ def categoria_cadastrar_page(page: ft.Page):
     user = SessionManager.get_current_user()
     controller = CategoriaController()
 
+    sidebar = categoria_sidebar(page, user, "/categoria/cadastrar")
+
     nome_field = ft.TextField(label="Nome da categoria", width=400)
     mensagem = ft.Text()
 
@@ -191,7 +152,7 @@ def categoria_cadastrar_page(page: ft.Page):
         controls=[
             ft.Row(
                 controls=[
-                    barra_lateral(user, page, "cadastrar"),
+                    sidebar,
                     ft.Container(
                         content=ft.Column(
                             controls=[
@@ -254,6 +215,8 @@ def categoria_detalhar_page(page: ft.Page, categoria_id: int):
     controller = CategoriaController()
     categoria = controller.get_categoria(categoria_id)
 
+    sidebar  = categoria_sidebar(page, user, "/categoria/listar")
+
     if not categoria:
         show_alert(
                 page, 
@@ -311,7 +274,7 @@ def categoria_detalhar_page(page: ft.Page, categoria_id: int):
         controls=[
             ft.Row(
                 controls=[
-                    barra_lateral(user, page, "detalhar"),
+                    sidebar,
                     ft.Container(
                         content=ft.Column(
                             controls=[
