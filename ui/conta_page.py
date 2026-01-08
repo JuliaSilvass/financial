@@ -161,12 +161,12 @@ def conta_cadastrar_page(page: ft.Page):
         label="Tipo de Conta",
         width=400,
         options=[
-            ft.dropdown.Option("corrente", "Conta Corrente"),
-            ft.dropdown.Option("poupanca", "Poupança"),
-            ft.dropdown.Option("investimento", "Investimento"),
-            ft.dropdown.Option("cartao_credito", "Cartão de Crédito"),
-            ft.dropdown.Option("carteira", "Carteira"),
-            ft.dropdown.Option("outros", "Outros"),
+            ft.dropdown.Option("Corrente", "Conta Corrente"),
+            ft.dropdown.Option("Poupança", "Poupança"),
+            ft.dropdown.Option("Investimento", "Investimento"),
+            ft.dropdown.Option("Cartão de Crédito", "Cartão de Crédito"),
+            ft.dropdown.Option("Carteira", "Carteira"),
+            ft.dropdown.Option("Outros", "Outros"),
         ]
     )
     saldo_inicial_field = ft.TextField(label="Saldo Inicial", width=400)

@@ -57,6 +57,9 @@ def build_list_page(
             for col in columns:
                 value = getattr(item, col["field"], "-")
 
+                if isinstance(value, bool):
+                    value = "Ativa" if value else "Inativa"
+
                 if col.get("type") == "date":
                     value = formatar_data_br(value)
 
