@@ -24,7 +24,7 @@ def categoria_sidebar(page, user, active_route:str):
 
 
 # --------------------------------------------------------------------
-# Página de LISTAGEM
+# LISTAR CATEGORIAS
 # --------------------------------------------------------------------
 def categoria_listar_page(page: ft.Page):
     if not SessionManager.is_logged_in():
@@ -36,45 +36,81 @@ def categoria_listar_page(page: ft.Page):
 
     sidebar  = categoria_sidebar(page, user, "/categoria/listar")
 
-    tabela = ft.Column(spacing=10)
+    categorias = controller.listar_categoria(user["id"])
+    columns = [
+        {"label": "Nome", "field": "categoria_nome", "width": 200},
+    ]
+
+    def on_click(cat):
+        page.go(f"/categoria/detalhar/{cat.categoria_id}")
+
+    # --------------------------------------------------
+    # Tabela (variável que será atualizada)
+    # --------------------------------------------------
+    tabela = build_list_page(
+        items=categorias,
+        columns=columns,
+        on_item_click=on_click,
+    )
+
+    # --------------------------------------------------
+    # Busca 
+    # --------------------------------------------------
+    def on_search(texto):
+        texto = texto.lower()
+        filtrados = [
+            cat for cat in categorias
+            if texto in cat.categoria_nome.lower()
+        ]
+
+        nova_tabela = build_list_page(
+            items=filtrados,
+            columns=columns,
+            on_item_click=on_click,
+            search_bar=search_bar,  # mantém a barra
+        )
+
+        tabela.controls.clear()
+        tabela.controls.extend(nova_tabela.controls)
+        page.update()
+
+    search_bar = build_search_bar(
+        hint_text="Pesquisar categorias...",
+        on_change=on_search
+    )
+
+    # --------------------------------------------------
+    # Recria tabela com search bar
+    # --------------------------------------------------
+    tabela = build_list_page(
+        items=categorias,
+        columns=columns,
+        on_item_click=on_click,
+        search_bar=search_bar,
+    )
 
     def voltar_click(e):
         page.go("/dashboard")
 
-    def carregar_lista():
-        categoria = controller.listar_categoria(user["id"])
-        tabela.controls.clear()
-
-        if not categoria:
-            tabela.controls.append(ft.Text("Nenhuma categoria encontrada.", color="gray"))
-        else:
-            for cat in categoria:
-                linha = ft.Container(
-                    content=ft.Row(
-                        [
-                            ft.Text(f"{cat.categoria_nome}", width=200, weight="bold"),
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    ),
-                    padding=ft.padding.symmetric(vertical=10, horizontal=15),
-                    border_radius=8,
-                    bgcolor="#F1F8E9",
-                    on_click=lambda e, a_id=cat.categoria_id: page.go(f"/categoria/detalhar/{a_id}")
-                )
-                linha.hover_color = "#C8E6C9"
-                tabela.controls.append(linha)
-        page.update()
-
-    carregar_lista()
-
     return ft.View(
         route="/categoria/listar",
+        padding=20,
+        bgcolor="#F5F5F5",
         controls=[
             ft.Row(
+                expand=True,
+                spacing=20,
                 controls=[
                     sidebar,
                     ft.Container(
+                        expand=True,
+                        padding=ft.padding.all(30),
+                        bgcolor="#FAFAFA",
+                        border_radius=10,
+                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0"),
                         content=ft.Column(
+                            expand=True,
+                            spacing=15,
                             controls=[
                                 ft.Row(
                                     [
@@ -83,30 +119,24 @@ def categoria_listar_page(page: ft.Page):
                                             tooltip="Voltar ao dashboard",
                                             on_click=voltar_click
                                         ),
-                                        ft.Text("Categorias cadastradas", size=26, weight="bold", color="#1E3D59")
-                                    ],
-                                    alignment=ft.MainAxisAlignment.START
+                                        ft.Text(
+                                                "Categorias cadastradas", 
+                                                size=26, 
+                                                weight="bold"
+                                            ),
+                                    ]
                                 ),
                                 ft.Divider(),
                                 tabela
                             ],
-                            spacing=15,
-                            expand=True
                         ),
-                        expand=True,
-                        padding=ft.padding.all(30),
-                        bgcolor="#FAFAFA",
-                        border_radius=10,
-                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0"),
-                    )
+                    ),
                 ],
-                expand=True,
-                spacing=20
             )
         ],
-        padding=20,
-        bgcolor="#F5F5F5"
     )
+
+
 
 
 # --------------------------------------------------------------------
