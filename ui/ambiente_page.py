@@ -258,7 +258,7 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
         show_alert(
             page, 
             "Ambiente não encontrado", 
-            "Ambiente não encontrado."
+            "O Ambiente solicitado não foi encontrado ou não existe."
         )
         page.go("/ambiente/listar")
         return
@@ -312,7 +312,7 @@ def ambiente_detalhar_page(page: ft.Page, ambiente_id: int):
         show_confirm_dialog(
             page, 
             title="Confirmar Exclusão",
-            message="Tem certeza que deseja excluir este ambiente? Esta ação não pode ser desfeita.",
+            message="Tem certeza que deseja excluir este ambiente? Esta ação é irreversível.",
             on_confirm=confirmar_exclusao
         )
 

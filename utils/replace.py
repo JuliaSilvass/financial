@@ -10,3 +10,11 @@ def replace(data):
         return "Ativo" if data else "Inativo"
     return str(data)
 
+# ----------------------------------------------------------
+# Ajustar o formato do valor para float 
+# ----------------------------------------------------------
+def to_float(value):
+    try:
+        return float(str(value).replace(",", "."))
+    except ValueError:
+        return 0.0
