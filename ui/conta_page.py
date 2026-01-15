@@ -7,6 +7,15 @@ from utils.list_page import build_list_page
 from utils.search_bar import build_search_bar
 from utils.replace import to_float
 
+# --------------------------------------------------------------------
+# Define a cor do campo saldo disponível com base no valor
+# --------------------------------------------------------------------
+def cor_saldo_disponivel(saldo):
+    if saldo < 0:
+        return "#FDECEA" 
+    else:
+        return "#F3F4F6"  
+
 
 # --------------------------------------------------------------------
 # sidebar 
@@ -157,6 +166,13 @@ def conta_cadastrar_page(page: ft.Page):
 
     sidebar = conta_sidebar(page, user, "/conta/cadastrar")
 
+    def on_saldo_inicial_change(e):
+        valor = to_float(e.control.value)
+        saldo_disponivel_field.value = e.control.value
+        saldo_disponivel_field.bgcolor = cor_saldo_disponivel(valor)
+
+        page.update()
+
     nome_field = ft.TextField(
         label="Nome da Conta", 
         width=400,
@@ -179,14 +195,14 @@ def conta_cadastrar_page(page: ft.Page):
         width=400,
         keyboard_type=ft.KeyboardType.NUMBER,
         input_filter=ft.InputFilter(r"[0-9.,]"),
-        hint_text="Ex: 1500,00"
+        hint_text="Ex: 1500,00",
+        on_change=on_saldo_inicial_change
     )
     saldo_disponivel_field = ft.TextField(
         label="Saldo Disponível", 
         width=400,
-        keyboard_type=ft.KeyboardType.NUMBER,
-        input_filter=ft.InputFilter(r"[0-9.,]"),
-        hint_text="Ex: 1500,00"
+        read_only=True,
+        hint_text="Calculado automaticamente",
     )
     ativo_field = ft.CupertinoSwitch(
         value=True
@@ -218,7 +234,7 @@ def conta_cadastrar_page(page: ft.Page):
         nome = nome_field.value.strip()
         tipo = tipo_field.value
         saldo_inicial = to_float(saldo_inicial_field.value)
-        saldo_disponivel = to_float(saldo_disponivel_field.value)
+        saldo_disponivel = to_float(saldo_inicial_field.value)
         conta_ativo = ativo_field.value
 
         if not nome or not tipo:
@@ -343,16 +359,16 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
     saldo_inicial_field = ft.TextField(
         label="Saldo Inicial", 
         width=400, 
-        keyboard_type=ft.KeyboardType.NUMBER,
-        input_filter=ft.InputFilter(r"[0-9.,]"),
-        value=str(conta.conta_saldo_limite_inicial)
+        read_only=True,
+        value=str(conta.conta_saldo_limite_inicial),
+        bgcolor="#F3F4F6"
     )
     saldo_disponivel_field = ft.TextField(
         label="Saldo Disponível", 
         width=400,
-        keyboard_type=ft.KeyboardType.NUMBER,
-        input_filter=ft.InputFilter(r"[0-9.,]"), 
-        value=str(conta.conta_saldo_limite_disponivel)
+        read_only=True,
+        value=str(conta.conta_saldo_limite_disponivel),
+        bgcolor=cor_saldo_disponivel(conta.conta_saldo_limite_disponivel)
     )
     ativo_field = ft.CupertinoSwitch(
         value=conta.conta_ativo
@@ -416,22 +432,6 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
             on_confirm=confirmar_excluir
         )
 
-        # bs = ft.BottomSheet(
-        #     ft.Container(
-        #         ft.Column([
-        #             ft.Text("Confirmar exclusão", weight="bold", size=18),
-        #             ft.Text("Tem certeza que deseja excluir esta conta? Esta ação é irreversível."),
-        #             ft.Row([
-        #                 ft.TextButton("Cancelar", on_click=lambda ev: (setattr(bs, "open", False), page.update())),
-        #                 ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
-        #             ], alignment=ft.MainAxisAlignment.END)
-        #         ]),
-        #         padding=20,
-        #     ),
-        #     open=True,
-        # )
-        # page.overlay.append(bs)
-        # page.update()
 
     return ft.View(
         route=f"/conta/detalhar/{conta_id}",

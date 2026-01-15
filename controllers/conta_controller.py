@@ -7,7 +7,7 @@ class ContaController:
 
     def register_conta(self, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo, usuario_id):
         
-        if tipo == "Poupança" and saldo_inicial < 0 and saldo_disponivel < 0:
+        if tipo == "Poupança" and (saldo_inicial < 0 or saldo_disponivel < 0):
             mensagem = "Saldo inicial/disponível para conta Poupança não pode ser negativo."
             logging.error(f"Erro ao cadastrar conta: {mensagem}")
             return False, mensagem
