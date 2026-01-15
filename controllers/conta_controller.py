@@ -6,6 +6,12 @@ class ContaController:
         self.service = ContaService()
 
     def register_conta(self, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo, usuario_id):
+        
+        if tipo == "Poupança" and saldo_inicial < 0 and saldo_disponivel < 0:
+            mensagem = "Saldo inicial/disponível para conta Poupança não pode ser negativo."
+            logging.error(f"Erro ao cadastrar conta: {mensagem}")
+            return False, mensagem
+        
         """
         Cadastra uma nova conta financeiro.
         """
@@ -34,6 +40,12 @@ class ContaController:
             return []
 
     def update_conta(self, conta_id, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo):
+        
+        if tipo == "Poupança" and saldo_inicial < 0 and saldo_disponivel < 0:
+            mensagem = "Saldo inicial/disponível para conta Poupança não pode ser negativo."
+            logging.error(f"Erro ao cadastrar conta: {mensagem}")
+            return False, mensagem
+        
         """
         Atualiza uma conta existente.
         """
