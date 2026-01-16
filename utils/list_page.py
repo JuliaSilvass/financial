@@ -67,7 +67,7 @@ def build_list_page(
 
                 row_controls.append(
                     ft.Text(
-                        str(value) if value else "-",
+                        "-" if value is None else str(value),
                         width=col.get("width", 150),
                         size=15 if is_first_col else 14,
                         weight="bold" if is_first_col else None,
