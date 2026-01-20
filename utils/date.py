@@ -17,7 +17,7 @@ def formatar_data_br(data):
 def date_picker_br (page: ft.Page, label="Data"):
     data_field = ft.TextField(
         label=label,
-        width=400,
+        width=350,
         read_only=True,
         hint_text="Ex: 01/01/2000",
     )
@@ -48,7 +48,7 @@ def date_picker_br (page: ft.Page, label="Data"):
     return (
         ft.Row(
             controls=[data_field, calendar_button],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            alignment=ft.MainAxisAlignment.CENTER,
         ),
         data_field
     )
