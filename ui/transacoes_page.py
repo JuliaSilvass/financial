@@ -206,9 +206,9 @@ def transacao_cadastrar_page(page: ft.Page):
         ]
     )
     ambiente_field = ft.Dropdown(
-    label="Ambiente",
-    width=400,
-    options=[ft.dropdown.Option(str(a.ambiente_id), a.ambiente_nome) for a in ambientes],
+        label="Ambiente",
+        width=400,
+        options=[ft.dropdown.Option(str(a.ambiente_id), a.ambiente_nome) for a in ambientes],
     )
 
     categoria_field = ft.Dropdown(
@@ -217,12 +217,86 @@ def transacao_cadastrar_page(page: ft.Page):
         options=[ft.dropdown.Option(str(c.categoria_id), c.categoria_nome) for c in categorias],
     )
 
+    local_field = ft.TextField(
+        label="Local (opcional)",
+        width=400,
+        hint_text="Ex: Supermercado XYZ"
+    )
+
+    observacao_field = ft.TextField(
+        label="Observação (opcional)",
+        width=400,
+        hint_text="Ex: Compra realizada com desconto"
+    )
+
+    recorrente_field = ft.Checkbox(
+        label="Recorrente", 
+        value=False
+    )
+
+    frequencia_field = ft.Dropdown(
+        label="Frequência (se recorrente)",
+        width=400,
+        options=[
+            ft.dropdown.Option("diaria", "Diária"),
+            ft.dropdown.Option("semanal", "Semanal"),
+            ft.dropdown.Option("mensal", "Mensal"),
+            ft.dropdown.Option("anual", "Anual"),
+        ]
+    )
+    
+    tipoRecorrencia_field = ft.Dropdown(
+        label="Tipo de Recorrência (se recorrente)",
+        width=400,
+        options=[
+            ft.dropdown.Option("fixa", "Fixa"),
+            ft.dropdown.Option("variavel", "Variável"),
+        ]
+    )
+
+    dt_fim_recorrencia_field, date_picker = date_picker_br(
+        page,
+        label="Data de Fim da Recorrência (Opcional)"
+    )
+
+    # meta_field = ft.Dropdown(
+    #     label="Meta (opcional)",
+    #     width=400,
+    #     options=[ft.dropdown.Option(str(m.meta_id), m.meta_nome) for m in []],  # metas
+    # )
+
     conta_field = ft.Dropdown(
         label="Conta",
         width=400,
         options=[ft.dropdown.Option(str(ct.conta_id), ct.conta_nome) for ct in contas],
     )
 
+    dt_pagamento_field, date_picker = date_picker_br(
+        page,
+        label="Data do pagamento (Opcional)"
+    )
+
+    dt_vencimento_field, date_picker = date_picker_br(
+        page,
+        label="Data do vencimento (Opcional)"
+    )
+
+    # Mudar isso pra um tipo de seletor...
+    total_parcelas_field = ft.TextField(
+        label="Total de parcelas (se parcelado)",
+        width=400,
+        keyboard_type=ft.KeyboardType.NUMBER,
+        input_filter=ft.InputFilter(r"[0-9]"),
+        hint_text="Ex: 12"
+    )
+
+    parcela_atual_field = ft.TextField(
+        label="Parcela atual (se parcelado)",
+        width=400,
+        keyboard_type=ft.KeyboardType.NUMBER,
+        input_filter=ft.InputFilter(r"[0-9]"),
+        hint_text="Ex: 1"
+    )
 
     pago_field = ft.Checkbox(label="Pago", value=True)
     mensagem = ft.Text(color="green")
