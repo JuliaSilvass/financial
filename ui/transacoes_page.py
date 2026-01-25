@@ -269,6 +269,7 @@ def transacao_cadastrar_page(page: ft.Page):
         label="Conta",
         width=400,
         options=[ft.dropdown.Option(str(ct.conta_id), ct.conta_nome) for ct in contas],
+        on_change=on_conta_change
     )
 
     dt_pagamento_field, date_picker = date_picker_br(
@@ -301,6 +302,7 @@ def transacao_cadastrar_page(page: ft.Page):
     pago_field = ft.Checkbox(label="Pago", value=True)
     mensagem = ft.Text(color="green")
 
+
     def to_float(value):
         try:
             return float(str(value).replace(",", "."))
@@ -321,6 +323,15 @@ def transacao_cadastrar_page(page: ft.Page):
         conta_id = conta_field.value
         # meta_id = meta_field.value if meta_field.value else None
         pago = pago_field.value
+
+
+        if not conta_id or not descricao or not data or valor <= 0 or not tipo or not modo or not ambiente_id or not categoria_id:
+            show_alert(
+                page, 
+                "Campo obrigatório",
+                f"O campo {conta_field.label} é obrigatório para cadastrar uma transação."
+            )
+            return
 
         if not descricao or valor <= 0 or not data or not tipo or not modo or not ambiente_id or not categoria_id or not conta_id:
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -356,6 +367,39 @@ def transacao_cadastrar_page(page: ft.Page):
                 page.go("/transacao/listar")
         page.update()
 
+    contas_map = {
+        str(ct.conta_id): ct.conta_tipo
+        for ct in contas
+    }
+
+
+    def on_conta_change(e):
+        conta_id = e.control.value
+
+        if not conta_id:
+            cartao_credito_container.visible = False
+            page.update()
+            return
+
+        tipo_conta = contas_map.get(conta_id)
+
+        if tipo_conta == "Cartão de Crédito":
+            cartao_credito_container.visible = True
+        else:
+            cartao_credito_container.visible = False
+
+        page.update()
+
+    # Container que agrupa os campos de cartão de crédito
+    cartao_credito_container = ft.Column(
+        controls=[
+            total_parcelas_field,
+            parcela_atual_field,
+            dt_vencimento_field,
+        ],
+        spacing=15,
+        visible=False, 
+    )
 
     return ft.View(
         route="/transacao/cadastrar",
@@ -379,6 +423,7 @@ def transacao_cadastrar_page(page: ft.Page):
                                 ambiente_field,
                                 categoria_field,
                                 conta_field,
+                                cartao_credito_container,
                                 pago_field,
 
                                 ft.ElevatedButton(
