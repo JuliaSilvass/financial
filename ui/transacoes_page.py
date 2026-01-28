@@ -165,12 +165,36 @@ def transacao_cadastrar_page(page: ft.Page):
     contas = contaController.listar_conta(user["id"])
     # metas = metaController.listar_meta(user["id"])
 
+    contas_map = {
+        str(ct.conta_id): ct.conta_tipo
+        for ct in contas
+    }
+
+    def on_conta_change(e):
+        conta_id = e.control.value
+
+        if not conta_id:
+            cartao_credito_container.visible = False
+            page.update()
+            return
+
+        tipo_conta = contas_map.get(conta_id)
+
+        if tipo_conta == "Cartão de Crédito":
+            cartao_credito_container.visible = True
+        else:
+            cartao_credito_container.visible = False
+
+        page.update()
+
+
     # Campos principais
     descricao_field = ft.TextField(
         label="Descrição da transação", 
         width=400,
         hint_text="Ex: Compra no supermercado"
         )
+    
     valor_field = ft.TextField(
         label="Valor (R$)", 
         width=400,
@@ -269,6 +293,7 @@ def transacao_cadastrar_page(page: ft.Page):
         label="Conta",
         width=400,
         options=[ft.dropdown.Option(str(ct.conta_id), ct.conta_nome) for ct in contas],
+        on_change=on_conta_change
     )
 
     dt_pagamento_field, date_picker = date_picker_br(
@@ -315,12 +340,13 @@ def transacao_cadastrar_page(page: ft.Page):
         valor = to_float(valor_field.value)
         data = data_field.value.strip()
         tipo = tipo_field.value
-        modo = modo_field.value
+        modo = modo_field.value     
         ambiente_id = ambiente_field.value
         categoria_id = categoria_field.value
         conta_id = conta_field.value
         # meta_id = meta_field.value if meta_field.value else None
         pago = pago_field.value
+        
 
         if not descricao or valor <= 0 or not data or not tipo or not modo or not ambiente_id or not categoria_id or not conta_id:
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -356,57 +382,95 @@ def transacao_cadastrar_page(page: ft.Page):
                 page.go("/transacao/listar")
         page.update()
 
+    cartao_credito_container = ft.Column(
+        controls=[
+            total_parcelas_field,
+            parcela_atual_field,
+            dt_vencimento_field,
+        ],
+        visible=False,
+        spacing=20,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
 
     return ft.View(
         route="/transacao/cadastrar",
+        padding=20,
+        bgcolor="#F5F5F5",
         controls=[
             ft.Row(
+                expand=True,
+                spacing=20,
                 controls=[
                     sidebar,
                     ft.Container(
-                        content=ft.Column(
-                            controls=[
-                                ft.Row([
-                                    ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
-                                    ft.Text("Cadastrar Nova Transação", size=26, weight="bold", color="#1E3D59")
-                                ]),
-                                ft.Divider(),
-                                descricao_field,
-                                valor_field,
-                                data_field,
-                                tipo_field,
-                                modo_field,
-                                ambiente_field,
-                                categoria_field,
-                                conta_field,
-                                pago_field,
-
-                                ft.ElevatedButton(
-                                    text="Salvar Transação",
-                                    icon=ft.Icons.SAVE,
-                                    bgcolor="#44CFA1",
-                                    color="white",
-                                    on_click=salvar_click
-                                ),
-                                mensagem
-                            ],
-                            spacing=20,
-                            alignment=ft.MainAxisAlignment.START,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                        ),
                         expand=True,
                         padding=ft.padding.all(40),
                         bgcolor="#FAFAFA",
                         border_radius=10,
-                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0")
+                        shadow=ft.BoxShadow(blur_radius=8, color="#E0E0E0"),
+                        content=ft.Column(
+                            expand=True,
+                            spacing=20,
+                            controls=[
+                                # ------------------------
+                                # CABEÇALHO (FIXO)
+                                # ------------------------
+                                ft.Row(
+                                    [
+                                        ft.IconButton(
+                                            icon=ft.Icons.ARROW_BACK,
+                                            tooltip="Voltar",
+                                            on_click=voltar_click
+                                        ),
+                                        ft.Text(
+                                            "Cadastrar Nova Transação",
+                                            size=26,
+                                            weight="bold"
+                                        )
+                                    ]
+                                ),
+                                ft.Divider(),
+
+                                # ------------------------
+                                # COM SCROLL
+                                # ------------------------
+                                ft.Container(
+                                    expand=True,
+                                    content=ft.Column(
+                                        expand=True,
+                                        scroll=ft.ScrollMode.AUTO, 
+                                        spacing=20,
+                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                        controls=[
+                                            descricao_field,
+                                            valor_field,
+                                            data_field,
+                                            tipo_field,
+                                            modo_field,
+                                            ambiente_field,
+                                            categoria_field,
+                                            conta_field,
+                                            cartao_credito_container,
+                                            pago_field,
+                                            ft.ElevatedButton(
+                                                text="Salvar Transação",
+                                                icon=ft.Icons.SAVE,
+                                                bgcolor="#44CFA1",
+                                                color="white",
+                                                on_click=salvar_click
+                                            ),
+                                            mensagem
+                                        ],
+                                    ),
+                                )
+                            ],
+                        )
+
                     )
                 ],
-                expand=True,
-                spacing=20
             )
         ],
-        padding=20,
-        bgcolor="#F5F5F5"
     )
 
 
