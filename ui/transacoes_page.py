@@ -326,6 +326,7 @@ def transacao_cadastrar_page(page: ft.Page):
     pago_field = ft.Checkbox(label="Pago", value=True)
     mensagem = ft.Text(color="green")
 
+
     def to_float(value):
         try:
             return float(str(value).replace(",", "."))
@@ -347,6 +348,15 @@ def transacao_cadastrar_page(page: ft.Page):
         # meta_id = meta_field.value if meta_field.value else None
         pago = pago_field.value
         
+
+
+        if not conta_id or not descricao or not data or valor <= 0 or not tipo or not modo or not ambiente_id or not categoria_id:
+            show_alert(
+                page, 
+                "Campo obrigatório",
+                f"O campo {conta_field.label} é obrigatório para cadastrar uma transação."
+            )
+            return
 
         if not descricao or valor <= 0 or not data or not tipo or not modo or not ambiente_id or not categoria_id or not conta_id:
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -404,6 +414,37 @@ def transacao_cadastrar_page(page: ft.Page):
                 controls=[
                     sidebar,
                     ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Row([
+                                    ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
+                                    ft.Text("Cadastrar Nova Transação", size=26, weight="bold", color="#1E3D59")
+                                ]),
+                                ft.Divider(),
+                                descricao_field,
+                                valor_field,
+                                data_field,
+                                tipo_field,
+                                modo_field,
+                                ambiente_field,
+                                categoria_field,
+                                conta_field,
+                                cartao_credito_container,
+                                pago_field,
+
+                                ft.ElevatedButton(
+                                    text="Salvar Transação",
+                                    icon=ft.Icons.SAVE,
+                                    bgcolor="#44CFA1",
+                                    color="white",
+                                    on_click=salvar_click
+                                ),
+                                mensagem
+                            ],
+                            spacing=20,
+                            alignment=ft.MainAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        ),
                         expand=True,
                         padding=ft.padding.all(40),
                         bgcolor="#FAFAFA",
