@@ -255,7 +255,7 @@ def transacao_cadastrar_page(page: ft.Page):
 
     recorrente_field = ft.Checkbox(
         label="Recorrente", 
-        value=False
+        value=False,
     )
 
     frequencia_field = ft.Dropdown(
@@ -323,7 +323,12 @@ def transacao_cadastrar_page(page: ft.Page):
         hint_text="Ex: 1"
     )
 
-    pago_field = ft.Checkbox(label="Pago", value=True)
+    pago_field = ft.Checkbox(
+        label="Pago", 
+        value=True,
+    )
+
+
     mensagem = ft.Text(color="green")
 
 
@@ -414,37 +419,6 @@ def transacao_cadastrar_page(page: ft.Page):
                 controls=[
                     sidebar,
                     ft.Container(
-                        content=ft.Column(
-                            controls=[
-                                ft.Row([
-                                    ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Voltar", on_click=voltar_click),
-                                    ft.Text("Cadastrar Nova Transação", size=26, weight="bold", color="#1E3D59")
-                                ]),
-                                ft.Divider(),
-                                descricao_field,
-                                valor_field,
-                                data_field,
-                                tipo_field,
-                                modo_field,
-                                ambiente_field,
-                                categoria_field,
-                                conta_field,
-                                cartao_credito_container,
-                                pago_field,
-
-                                ft.ElevatedButton(
-                                    text="Salvar Transação",
-                                    icon=ft.Icons.SAVE,
-                                    bgcolor="#44CFA1",
-                                    color="white",
-                                    on_click=salvar_click
-                                ),
-                                mensagem
-                            ],
-                            spacing=20,
-                            alignment=ft.MainAxisAlignment.START,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                        ),
                         expand=True,
                         padding=ft.padding.all(40),
                         bgcolor="#FAFAFA",
@@ -485,15 +459,28 @@ def transacao_cadastrar_page(page: ft.Page):
                                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                                         controls=[
                                             descricao_field,
+                                            local_field,
                                             valor_field,
                                             data_field,
                                             tipo_field,
+                                            ft.Container(
+                                                width=400,
+                                                alignment=ft.alignment.center_left,
+                                                content=recorrente_field
+                                            ),
+                                            tipoRecorrencia_field,
                                             modo_field,
                                             ambiente_field,
                                             categoria_field,
                                             conta_field,
                                             cartao_credito_container,
-                                            pago_field,
+                                            ft.Container(
+                                                width=400,
+                                                alignment=ft.alignment.center_left,
+                                                content=pago_field
+                                            ),
+                                            dt_pagamento_field,
+                                            observacao_field,
                                             ft.ElevatedButton(
                                                 text="Salvar Transação",
                                                 icon=ft.Icons.SAVE,
