@@ -187,6 +187,21 @@ def transacao_cadastrar_page(page: ft.Page):
 
         page.update()
 
+    def on_recorrente_change(e):
+        if recorrente_field.value:
+            recorrencia_container.visible = True
+        else:
+            recorrencia_container.visible = False
+            dt_fim_recorrencia_field_container.visible = False
+        page.update()
+
+    def on_recorrencia_fim(e):
+        if tipoRecorrencia_field.value == "fixa":
+            dt_fim_recorrencia_field_container.visible = False
+        else:
+            dt_fim_recorrencia_field_container.visible = True
+        page.update()
+
 
     # Campos principais
     descricao_field = ft.TextField(
@@ -256,6 +271,7 @@ def transacao_cadastrar_page(page: ft.Page):
     recorrente_field = ft.Checkbox(
         label="Recorrente", 
         value=False,
+        on_change=on_recorrente_change
     )
 
     frequencia_field = ft.Dropdown(
@@ -275,7 +291,8 @@ def transacao_cadastrar_page(page: ft.Page):
         options=[
             ft.dropdown.Option("fixa", "Fixa"),
             ft.dropdown.Option("variavel", "Variável"),
-        ]
+        ],
+        on_change=on_recorrencia_fim
     )
 
     dt_fim_recorrencia_field, date_picker = date_picker_br(
@@ -408,6 +425,25 @@ def transacao_cadastrar_page(page: ft.Page):
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
+    recorrencia_container = ft.Column(
+        controls=[
+            tipoRecorrencia_field,
+            frequencia_field,
+        ],
+        visible=False,
+        spacing=20,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+    dt_fim_recorrencia_field_container = ft.Column(
+        controls=[
+            dt_fim_recorrencia_field
+        ],
+        visible=False,
+        spacing=20,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
     return ft.View(
         route="/transacao/cadastrar",
         padding=20,
@@ -468,7 +504,8 @@ def transacao_cadastrar_page(page: ft.Page):
                                                 alignment=ft.alignment.center_left,
                                                 content=recorrente_field
                                             ),
-                                            tipoRecorrencia_field,
+                                            recorrencia_container,
+                                            dt_fim_recorrencia_field_container,
                                             modo_field,
                                             ambiente_field,
                                             categoria_field,
