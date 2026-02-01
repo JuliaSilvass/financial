@@ -42,7 +42,11 @@ def transacao_listar_page(page: ft.Page):
 
     transacoes = controller.listar_transacoes(user["id"])
     columns = [
-        {"label": "Transação", "width": 200},
+        {
+            "label": "Transação", 
+            "field": "transacao_descricao",
+            "width": 200
+         },
     ]
 
     def on_click(tra):
@@ -295,7 +299,7 @@ def transacao_cadastrar_page(page: ft.Page):
         on_change=on_recorrencia_fim
     )
 
-    dt_fim_recorrencia_field, date_picker = date_picker_br(
+    dt_fim_recorrencia_field, date_picker_fim_recorrencia = date_picker_br(
         page,
         label="Data de Fim da Recorrência (Opcional)"
     )
@@ -313,12 +317,12 @@ def transacao_cadastrar_page(page: ft.Page):
         on_change=on_conta_change
     )
 
-    dt_pagamento_field, date_picker = date_picker_br(
+    dt_pagamento_field, date_picker_pag = date_picker_br(
         page,
         label="Data do pagamento (Opcional)"
     )
 
-    dt_vencimento_field, date_picker = date_picker_br(
+    dt_vencimento_field, date_picker_venc = date_picker_br(
         page,
         label="Data do vencimento (Opcional)"
     )
@@ -342,9 +346,8 @@ def transacao_cadastrar_page(page: ft.Page):
 
     pago_field = ft.Checkbox(
         label="Pago", 
-        value=True,
+        value=False,
     )
-
 
     mensagem = ft.Text(color="green")
 
@@ -358,61 +361,6 @@ def transacao_cadastrar_page(page: ft.Page):
     def voltar_click(e):
         page.go("/transacao/listar")
 
-    def salvar_click(e):
-        descricao = descricao_field.value.strip()
-        valor = to_float(valor_field.value)
-        data = data_field.value.strip()
-        tipo = tipo_field.value
-        modo = modo_field.value     
-        ambiente_id = ambiente_field.value
-        categoria_id = categoria_field.value
-        conta_id = conta_field.value
-        # meta_id = meta_field.value if meta_field.value else None
-        pago = pago_field.value
-        
-
-
-        if not conta_id or not descricao or not data or valor <= 0 or not tipo or not modo or not ambiente_id or not categoria_id:
-            show_alert(
-                page, 
-                "Campo obrigatório",
-                f"O campo {conta_field.label} é obrigatório para cadastrar uma transação."
-            )
-            return
-
-        if not descricao or valor <= 0 or not data or not tipo or not modo or not ambiente_id or not categoria_id or not conta_id:
-            mensagem.value = "Preencha todos os campos obrigatórios."
-            mensagem.color = "red"
-        else:
-            ok, msg = transacaoController.register_transacao(
-                descricao=descricao,
-                valor=valor,
-                data=data,
-                ambiente_id=int(ambiente_id),
-                categoria_id=int(categoria_id),
-                conta_id=int(conta_id),
-                tipo=tipo,
-                modo=modo,
-                pago=pago
-            )
-            mensagem.value = msg
-            mensagem.color = "green" if ok else "red"
-
-            if ok:
-                descricao_field.value = ""
-                valor_field.value = ""
-                data_field.value = ""
-                tipo_field.value = None
-                modo_field.value = None
-                ambiente_field.value = ""
-                categoria_field.value = ""
-                conta_field.value = ""
-                pago_field.value = True
-
-                page.snack_bar = ft.SnackBar(ft.Text("Transação cadastrada com sucesso!"))
-                page.snack_bar.open = True
-                page.go("/transacao/listar")
-        page.update()
 
     cartao_credito_container = ft.Column(
         controls=[
@@ -443,6 +391,81 @@ def transacao_cadastrar_page(page: ft.Page):
         spacing=20,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )
+
+    def salvar_click(e):
+        descricao = descricao_field.value.strip()
+        valor = to_float(valor_field.value)
+        data = date_picker.value.strip()
+        ambiente_id = ambiente_field.value
+        categoria_id = categoria_field.value
+        # meta_id = meta_field.value if meta_field.value else None
+        local = local_field.value.strip()
+        observacao = observacao_field.value.strip()
+        recorrencia = recorrente_field.value
+        frequencia = frequencia_field.value
+        tipoRecorrencia = tipoRecorrencia_field.value
+        dt_fim_recorrencia = date_picker_fim_recorrencia.value.strip()
+        modo = modo_field.value     
+        tipo = tipo_field.value
+        pago = pago_field.value
+        data_pagamento = date_picker_pag.value.strip()
+        data_vencimento = date_picker_venc.value.strip()
+        total_parcelas = total_parcelas_field.value.strip()
+        parcela_atual = parcela_atual_field.value.strip()
+        conta_id = conta_field.value
+
+        # TODO: PRECISA AJUSTAR ESSA VALIDAÇÃO... PARA CADA CAMPO
+        if not conta_id or not descricao or not data or valor <= 0 or not tipo or not modo or not ambiente_id or not categoria_id:
+            show_alert(
+                page, 
+                "Campo obrigatório",
+                f"O campo {conta_field.label} é obrigatório para cadastrar uma transação."
+            )
+            return
+
+        ok, msg = transacaoController.register_transacao(
+            descricao=descricao,
+            valor=valor,
+            data=data,
+            ambiente_id=int(ambiente_id),
+            categoria_id=int(categoria_id),
+            # meta_id=int(meta_id),
+            local=local,
+            observacao=observacao,
+            recorrencia=recorrencia,
+            frequencia=frequencia,
+            tipo_recorrencia=tipoRecorrencia,
+            dt_fim_recorrencia=dt_fim_recorrencia,
+            modo=modo,
+            tipo=tipo,
+            pago=pago,
+            dt_pagamento=data_pagamento,
+            dt_vencimento=data_vencimento,
+            total_parcelas=total_parcelas,
+            parcela_atual=parcela_atual, 
+            conta_id=int(conta_id)
+        )
+
+
+        if ok:
+            # descricao_field.value = ""
+            # valor_field.value = ""
+            # data_field.value = ""
+            # tipo_field.value = None
+            # modo_field.value = None
+            # ambiente_field.value = ""
+            # categoria_field.value = ""
+            # conta_field.value = ""
+            # pago_field.value = True
+
+            page.go("/transacao/listar")
+        else :
+            show_alert(
+                page,
+                "Erro ao salvar", msg
+            )
+
+        page.update()
 
     return ft.View(
         route="/transacao/cadastrar",

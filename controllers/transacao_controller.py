@@ -8,6 +8,13 @@ class TransacaoController:
     def __init__(self):
         self.service = TransacaoService()
 
+    def _normalize(self, data: dict):
+        return {
+            k: None if v in ("", None) else v
+            for k, v in data.items()
+        }
+
+
     # --------------------------------------------------------
     # Cadastrar nova transação
     # --------------------------------------------------------
@@ -18,47 +25,54 @@ class TransacaoController:
         data,
         ambiente_id,
         categoria_id,
-        conta_id,
-        tipo,
-        modo,
-        pago=True,
         # meta_id=None,
-        local=None,
-        observacao=None,
-        recorrencia=False,
-        frequencia=None,
-        tipo_recorrencia=None,
-        dt_fim_recorrencia=None,
-        dt_pagamento=None,
-        dt_vencimento=None,
-        total_parcelas=1,
-        parcela_atual=1,
+        local,
+        observacao,
+        recorrencia,
+        frequencia,
+        tipo_recorrencia,
+        dt_fim_recorrencia,
+        modo,
+        tipo,
+        pago,
+        dt_pagamento,
+        dt_vencimento,
+        total_parcelas,
+        parcela_atual,
+        conta_id,
     ):
+        """
+        Trata os dados vazios convertendo-os para None.
+        """
+        payload = {
+            "descricao": descricao,
+            "valor": valor,
+            "data": data,
+            "ambiente_id": ambiente_id,
+            "categoria_id": categoria_id,
+            "local": local,
+            # "meta_id": meta_id,
+            "observacao": observacao,
+            "recorrencia": recorrencia,
+            "frequencia": frequencia,
+            "tipo_recorrencia": tipo_recorrencia,
+            "dt_fim_recorrencia": dt_fim_recorrencia,
+            "modo": modo,
+            "tipo": tipo,
+            "pago": pago,
+            "dt_pagamento": dt_pagamento,
+            "dt_vencimento": dt_vencimento,
+            "total_parcelas": total_parcelas,
+            "parcela_atual": parcela_atual,
+            "conta_id": conta_id,
+        }
+
+        payload = self._normalize(payload)
+
         """
         Cadastra uma nova transação no sistema.
         """
-        sucesso, mensagem = self.service.create_transacao(
-            descricao=descricao,
-            valor=valor,
-            data=data,
-            ambiente_id=ambiente_id,
-            categoria_id=categoria_id,
-            conta_id=conta_id,
-            tipo=tipo,
-            modo=modo,
-            pago=pago,
-            # meta_id=meta_id,
-            local=local,
-            observacao=observacao,
-            recorrencia=recorrencia,
-            frequencia=frequencia,
-            tipo_recorrencia=tipo_recorrencia,
-            dt_fim_recorrencia=dt_fim_recorrencia,
-            dt_pagamento=dt_pagamento,
-            dt_vencimento=dt_vencimento,
-            total_parcelas=total_parcelas,
-            parcela_atual=parcela_atual,
-        )
+        sucesso, mensagem = self.service.create_transacao(**payload)
 
         if sucesso:
             logging.info(f"Transação cadastrada com sucesso para usuário {SessionManager.get_current_user().get('id')}.")

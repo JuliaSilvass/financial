@@ -42,7 +42,7 @@ CREATE TABLE transacao (
     transacao_modo VARCHAR(50) NOT NULL CHECK (transacao_modo IN ('debito', 'credito', 'pix', 'dinheiro', 'TED', 'DOC', 'outros')),
     transacao_tipo VARCHAR(50) NOT NULL CHECK (transacao_tipo IN ('receita', 'despesa')),
     transacao_pago BOOLEAN DEFAULT TRUE,
-    transacao_dt_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    transacao_dt_pagamento TIMESTAMP,
     transacao_dt_vencimento DATE,
     transacao_total_parcelas INTEGER DEFAULT 1 CHECK (transacao_total_parcelas >= 1),
     transacao_parcela_atual INTEGER DEFAULT 1 CHECK (transacao_parcela_atual >= 1),
