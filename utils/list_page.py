@@ -18,8 +18,6 @@ def build_list_page(
     # largura base estimada da área útil
     BASE_WIDTH = 1200 
 
-    use_horizontal_scroll = total_width > BASE_WIDTH
-
     # --------------------------------------------------
     # Header
     # --------------------------------------------------
