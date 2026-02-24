@@ -47,6 +47,80 @@ def transacao_listar_page(page: ft.Page):
             "field": "transacao_descricao",
             "width": 200
          },
+         {
+            "label": "Valor (R$)", 
+            "field": "transacao_valor",
+            "width": 150,
+         }, 
+         {
+            "label": "Data", 
+            "field": "transacao_data",
+            "width": 160, 
+            "type": "date"
+         },
+         {
+            "label":"Ambiente",
+            "field": "ambiente_nome",
+            "width": 200
+         },
+         {
+            "label":"Categoria",
+            "field": "categoria_nome",
+            "width": 200
+         },
+         {
+            "label":"Meta",
+            "field": "meta_nome",
+            "width": 200
+         },
+         {
+            "label":"Local", 
+            "field": "transacao_local",
+            "width": 200
+         },
+         {
+            "label":"Observação",
+            "field": "transacao_observacao",
+            "width": 200
+         },
+         {
+            "label":"Tipo",
+            "field": "transacao_tipo",
+            "width": 120
+         },
+         {
+            "label":"Modo de Pagamento",
+            "field": "transacao_modo",
+            "width": 150
+         },
+         {
+            "label":"Pago",
+            "field": "transacao_pago",
+            "width": 100,
+            "type": "boolean"
+         },
+         {
+            "label":"Data de Pagamento",
+            "field": "transacao_dt_pagamento",
+            "width": 160,
+            "type": "date"    
+         },
+         {
+            "label":"Data de Vencimento",
+            "field": "transacao_dt_vencimento",
+            "width": 160,
+            "type": "date"
+        },
+        {
+            "label":"Total de Parcelas",
+            "field": "transacao_total_parcelas",
+            "width": 150         
+        },
+        {
+            "label":"Parcela Atual",
+            "field": "transacao_parcela_atual",
+            "width": 150         
+        },
     ]
 
     def on_click(tra):

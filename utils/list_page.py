@@ -3,6 +3,8 @@ import flet as ft
 from .date import formatar_data_br
 
 
+
+
 def build_list_page(
     *,
     items: list,
@@ -11,6 +13,13 @@ def build_list_page(
     search_bar=None,
     empty_message="Nenhum registro encontrado."
 ):
+    total_width = sum(col.get("width", 150) for col in columns)
+
+    # largura base estimada da área útil
+    BASE_WIDTH = 1200 
+
+    use_horizontal_scroll = total_width > BASE_WIDTH
+
     # --------------------------------------------------
     # Header
     # --------------------------------------------------
@@ -29,7 +38,7 @@ def build_list_page(
                 )
                 for col in columns
             ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            spacing=0,
         ),
     )
 
@@ -79,7 +88,8 @@ def build_list_page(
                 ft.Container(
                     content=ft.Row(
                         row_controls,
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        spacing=0,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     padding=ft.padding.symmetric(vertical=12, horizontal=16),
                     bgcolor="#FFFFFF",
@@ -91,13 +101,38 @@ def build_list_page(
                 )
             )
 
+    table_core = ft.Column(
+        controls=[
+            header,
+            ft.Container(
+                content=rows,
+                expand=True,
+            )
+        ],
+        spacing=0,
+        expand=True,
+    )
+
+    total_width = sum(col.get("width", 150) for col in columns)
+    BASE_WIDTH = 1200
+    use_horizontal_scroll = total_width > BASE_WIDTH
+
+    if use_horizontal_scroll:
+        content = ft.Container(
+            content=ft.Row(
+                controls=[table_core],
+                scroll=ft.ScrollMode.AUTO,
+            ),
+            expand=True,
+        )
+    else:
+        content = table_core
+
     return ft.Column(
         expand=True,
         spacing=12,
         controls=[
             search_bar if search_bar else ft.Container(),
-            header,
-            rows,
+            content,
         ],
     )
-
