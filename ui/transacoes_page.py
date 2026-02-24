@@ -119,7 +119,7 @@ def transacao_listar_page(page: ft.Page):
         {
             "label":"Parcela Atual",
             "field": "transacao_parcela_atual",
-            "width": 150         
+            "width": 150        
         },
     ]
 

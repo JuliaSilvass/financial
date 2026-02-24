@@ -10,8 +10,8 @@ def formatar_data_br(data):
         return "-"
     if isinstance(data, str):
         return data
-    if isinstance(data, datetime):
-        return data.strftime("%d/%m/%Y %H:%M")
+    if isinstance(data, (datetime, date)):
+        return data.strftime("%d/%m/%Y")
     return str(data)
 
 def date_picker_br (page: ft.Page, label="Data"):
