@@ -107,27 +107,66 @@ class TransacaoController:
         transacao_id,
         descricao,
         valor,
-        tipo,
+        data,
+        ambiente_id,
+        categoria_id,
+        # meta_id=None,
+        local,
+        observacao,
+        recorrencia,
+        frequencia,
+        tipo_recorrencia,
+        dt_fim_recorrencia,
         modo,
+        tipo,
         pago,
-        observacao=None,
-        local=None,
-        dt_vencimento=None
+        dt_pagamento,
+        dt_vencimento,
+        total_parcelas,
+        parcela_atual,
+        conta_id,
     ):
+        
+        """
+        Trata os dados vazios convertendo-os para None.
+        """
+        payload = {
+            "transacao_id": transacao_id,
+            "descricao": descricao,
+            "valor": valor,
+            "data": data,
+            "ambiente_id": ambiente_id,
+            "categoria_id": categoria_id,
+            "local": local,
+            # "meta_id": meta_id,
+            "observacao": observacao,
+            "recorrencia": recorrencia,
+            "frequencia": frequencia,
+            "tipo_recorrencia": tipo_recorrencia,
+            "dt_fim_recorrencia": dt_fim_recorrencia,
+            "modo": modo,
+            "tipo": tipo,
+            "pago": pago,
+            "dt_pagamento": dt_pagamento,
+            "dt_vencimento": dt_vencimento,
+            "total_parcelas": total_parcelas,
+            "parcela_atual": parcela_atual,
+            "conta_id": conta_id,
+        }
+
+        payload = self._normalize(payload)
+
         """
         Atualiza uma transação existente.
         """
-        return self.service.update_transacao(
-            transacao_id,
-            descricao,
-            valor,
-            tipo,
-            modo,
-            pago,
-            observacao,
-            local,
-            dt_vencimento,
-        )
+        sucesso, mensagem = self.service.update_transacao(**payload)
+    
+        if sucesso:
+            logging.info(f"Transação atualizada com sucesso para usuário {SessionManager.get_current_user().get('id')}.")
+            return True, mensagem
+        else:
+            logging.error(f"Erro ao atualizar transação: {mensagem}")
+            return False, mensagem
 
     # --------------------------------------------------------
     # Excluir transação

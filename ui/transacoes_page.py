@@ -827,7 +827,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
         width=400,
         options=[ft.dropdown.Option(str(ct.conta_id), ct.conta_nome) for ct in contas],
         on_change=on_conta_change,
-        # value=transacao.transacao_conta_id
+        value=transacao.conta_id
     )
 
     dt_pagamento_field, date_picker_pag = date_picker_br(
@@ -849,7 +849,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
         keyboard_type=ft.KeyboardType.NUMBER,
         input_filter=ft.InputFilter(r"[0-9]"),
         hint_text="Ex: 12",
-        value=transacao.transacao_total_parcelas
+        value=str(transacao.transacao_total_parcelas)
     )
 
     parcela_atual_field = ft.TextField(
@@ -858,7 +858,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
         keyboard_type=ft.KeyboardType.NUMBER,
         input_filter=ft.InputFilter(r"[0-9]"),
         hint_text="Ex: 1",
-        value=transacao.transacao_parcela_atual 
+        value=str(transacao.transacao_parcela_atual)
     )
 
     pago_field = ft.Checkbox(
@@ -933,7 +933,8 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             )
             return
 
-        ok, msg = transacaoController.register_transacao(
+        ok, msg = transacaoController.update_transacao(
+            transacao_id=transacao_id,    
             descricao=descricao,
             valor=valor,
             data=data,
@@ -956,58 +957,26 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             conta_id=int(conta_id)
         )
 
-
         if ok:
-            # descricao_field.value = ""
-            # valor_field.value = ""
-            # data_field.value = ""
-            # tipo_field.value = None
-            # modo_field.value = None
-            # ambiente_field.value = ""
-            # categoria_field.value = ""
-            # conta_field.value = ""
-            # pago_field.value = True
-
-            page.go("/transacao/listar")
+            show_alert(page, "Sucesso", mensagem)
         else :
-            show_alert(
-                page,
-                "Erro ao salvar", msg
-            )
-
-        page.update()
+            show_alert(page, "Erro", mensagem)
 
     # --- EXCLUIR TRANSACAO ---
     def excluir_click(e):
-        def confirmar_excluir(ev):
-            ok, msg = TransacaoController.delete_transacao(transacao_id)
-            bs.open = False
-            page.update()
+        def confirmar_excluir():
+            ok, msg = transacaoController.delete_transacao(transacao_id)
             if ok:
-                page.snack_bar = ft.SnackBar(ft.Text("Transação excluída com sucesso!"))
-                page.snack_bar.open = True
                 page.go("/transacao/listar")
             else:
-                page.snack_bar = ft.SnackBar(ft.Text(f"Erro: {msg}"))
-                page.snack_bar.open = True
-            page.update()
+                show_alert(page, "Erro", msg)
 
-        bs = ft.BottomSheet(
-            ft.Container(
-                ft.Column([
-                    ft.Text("Confirmar exclusão", weight="bold", size=18),
-                    ft.Text("Tem certeza que deseja excluir esta transação? Esta ação é irreversível."),
-                    ft.Row([
-                        ft.TextButton("Cancelar", on_click=lambda ev: (setattr(bs, "open", False), page.update())),
-                        ft.TextButton("Excluir", on_click=confirmar_excluir, style=ft.ButtonStyle(color="red")),
-                    ], alignment=ft.MainAxisAlignment.END)
-                ]),
-                padding=20,
-            ),
-            open=True,
-        )
-        page.overlay.append(bs)
-        page.update()
+        show_confirm_dialog(
+            page,
+            title="Confirmar Exclusão",
+            message="Tem certeza que deseja excluir esta transação? Esta ação é irreversível.",
+            on_confirm=confirmar_excluir
+            )
 
     # --- VIEW FINAL ---
     return ft.View(
@@ -1083,12 +1052,23 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
                                             ),
                                             dt_pagamento_field,
                                             observacao_field,
-                                            ft.ElevatedButton(
-                                                text="Salvar Transação",
-                                                icon=ft.Icons.SAVE,
-                                                bgcolor="#44CFA1",
-                                                color="white",
-                                                on_click=salvar_click
+                                            ft.Row(
+                                                [
+                                                    ft.ElevatedButton(
+                                                        text="Salvar Alterações",
+                                                        icon=ft.Icons.SAVE,
+                                                        bgcolor="#44CFA1",
+                                                        color="white",
+                                                        on_click=salvar_click
+                                                    ),
+                                                    ft.OutlinedButton(
+                                                        "Excluir Transação",
+                                                        icon=ft.Icons.DELETE,
+                                                        on_click=excluir_click,
+                                                    ),
+                                                ],
+                                                spacing=15,
+                                                alignment=ft.MainAxisAlignment.CENTER,
                                             ),
                                             mensagem
                                         ],

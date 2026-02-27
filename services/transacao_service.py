@@ -89,12 +89,23 @@ class TransacaoService:
         transacao_id: int,
         descricao: str,
         valor: float,
+        data: date,
+        ambiente_id: int,
+        categoria_id: int,
+        conta_id: int,
         tipo: str,
         modo: str,
         pago: bool,
-        observacao: str = None,
         local: str = None,
-        dt_vencimento: date = None
+        observacao: str = None,
+        recorrencia: bool = False,
+        frequencia: str = None,
+        tipo_recorrencia: str = None,
+        dt_fim_recorrencia: date = None,
+        dt_pagamento: date = None,
+        dt_vencimento: date = None,
+        total_parcelas: int = 1,
+        parcela_atual: int = 1,
     ):
         try:
             transacao = (
@@ -105,14 +116,30 @@ class TransacaoService:
             if not transacao:
                 return False, "Transação não encontrada."
 
+            # Campos principais
             transacao.transacao_descricao = descricao
             transacao.transacao_valor = valor
+            transacao.transacao_data = data
+            transacao.transacao_ambiente_id = ambiente_id
+            transacao.transacao_categoria_id = categoria_id
+            transacao.conta_id = conta_id
+
+            # Tipo / modo
             transacao.transacao_tipo = tipo
             transacao.transacao_modo = modo
             transacao.transacao_pago = pago
-            transacao.transacao_observacao = observacao
+
+            # Extras
             transacao.transacao_local = local
+            transacao.transacao_observacao = observacao
+            transacao.transacao_recorrencia = recorrencia
+            transacao.transacao_frequencia = frequencia
+            transacao.transacao_tipo_recorrencia = tipo_recorrencia
+            transacao.transacao_dt_fim_recorrencia = dt_fim_recorrencia
+            transacao.transacao_dt_pagamento = dt_pagamento
             transacao.transacao_dt_vencimento = dt_vencimento
+            transacao.transacao_total_parcelas = total_parcelas
+            transacao.transacao_parcela_atual = parcela_atual
 
             self.db.commit()
             return True, "Transação atualizada com sucesso!"
