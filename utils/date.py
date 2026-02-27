@@ -14,11 +14,12 @@ def formatar_data_br(data):
         return data.strftime("%d/%m/%Y")
     return str(data)
 
-def date_picker_br (page: ft.Page, label="Data"):
+def date_picker_br (page: ft.Page, label="Data", value=None):
     data_field = ft.TextField(
         label=label,
         width=350,
         read_only=True,
+        value=formatar_data_br(value) if value is not None else "",
         hint_text="Ex: 01/01/2000",
     )
 
