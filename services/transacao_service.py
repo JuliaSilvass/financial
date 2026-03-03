@@ -1,7 +1,7 @@
 #services/transacao_service.py
 from models.transacao import Transacao
 from models.ambiente import Ambiente
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database.connection_db import SessionLocal
 from datetime import date
 import logging
@@ -50,11 +50,17 @@ class TransacaoService:
         try:
             transacoes = (
                 self.db.query(Transacao)
-                .join(Ambiente, Transacao.transacao_ambiente_id == Ambiente.ambiente_id)
+                .options(
+                    joinedload(Transacao.ambiente),
+                    joinedload(Transacao.categoria),
+                    joinedload(Transacao.conta),
+                )
+                .join(Transacao.ambiente) 
                 .filter(Ambiente.usuario_id == usuario_id)
                 .order_by(Transacao.transacao_data.desc())
                 .all()
             )
+
             return True, transacoes
 
         except Exception as e:

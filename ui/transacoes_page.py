@@ -41,6 +41,11 @@ def transacao_listar_page(page: ft.Page):
     sidebar = transacao_sidebar(page, user, "/transacao/listar")
 
     transacoes = controller.listar_transacoes(user["id"])
+    for tra in transacoes:
+        tra.ambiente_nome = tra.ambiente.ambiente_nome if tra.ambiente else "-"
+        tra.categoria_nome = tra.categoria.categoria_nome if tra.categoria else "-"
+        # tra.meta_nome = tra.meta.meta_nome if tra.meta else "-"
+
     columns = [
         {
             "label": "Transação", 
@@ -143,8 +148,9 @@ def transacao_listar_page(page: ft.Page):
 
         filtrados = [
             tra for tra in transacoes
-            if texto in tra.transacao_nome.lower()
+            if texto in tra.transacao_descricao.lower()
             or (tra.transacao_descricao and texto in tra.transacao_descricao.lower())
+            or (tra.transacao_local and texto in tra.transacao_local.lower())
         ]
 
         nova_tabela = build_list_page(
@@ -958,9 +964,9 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
         )
 
         if ok:
-            show_alert(page, "Sucesso", mensagem)
+            show_alert(page, "Sucesso", msg)
         else :
-            show_alert(page, "Erro", mensagem)
+            show_alert(page, "Erro", msg)
 
     # --- EXCLUIR TRANSACAO ---
     def excluir_click(e):
@@ -977,6 +983,22 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             message="Tem certeza que deseja excluir esta transação? Esta ação é irreversível.",
             on_confirm=confirmar_excluir
             )
+    
+    # -----------------------------
+    # Ajustar estado inicial
+    # -----------------------------
+
+    # Recorrência
+    if recorrente_field.value:
+        recorrencia_container.visible = True
+
+        if tipoRecorrencia_field.value != "fixa":
+            dt_fim_recorrencia_field_container.visible = True
+
+    # Cartão de crédito
+    tipo_conta = contas_map.get(str(conta_field.value))
+    if tipo_conta == "Cartão de Crédito":
+        cartao_credito_container.visible = True
 
     # --- VIEW FINAL ---
     return ft.View(

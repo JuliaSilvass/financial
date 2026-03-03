@@ -2,6 +2,10 @@
 from sqlalchemy import Column, Integer, String, Text, Numeric, Date, Boolean, ForeignKey, TIMESTAMP, func
 from database.connection_db import Base
 from sqlalchemy.orm import relationship
+from models.ambiente import Ambiente
+from models.categoria import Categoria
+from models.conta import Conta
+# from models.meta import Meta
 
 class Transacao(Base):
     __tablename__ = "transacao"
@@ -39,6 +43,11 @@ class Transacao(Base):
     # Parcelas
     transacao_total_parcelas = Column(Integer, default=1)
     transacao_parcela_atual = Column(Integer, default=1)
+
+    ambiente = relationship("Ambiente", backref="transacoes")
+    categoria = relationship("Categoria", backref="transacoes")
+    conta = relationship("Conta", backref="transacoes")
+    # meta = relationship("Meta", backref="transacoes")
 
     def __init__(
         self, descricao, valor, data, ambiente_id, categoria_id,
