@@ -365,6 +365,13 @@ def transacao_cadastrar_page(page: ft.Page):
             dt_fim_recorrencia_field_container.visible = True
         page.update()
 
+    def on_pago_change(e):
+        dt_pagamento_container.visible = pago_field.value
+
+        if not pago_field.value:
+            date_picker_pag.value = ""
+
+        page.update()
 
     # Campos principais
     descricao_field = ft.TextField(
@@ -477,8 +484,13 @@ def transacao_cadastrar_page(page: ft.Page):
     )
 
     dt_pagamento_field, date_picker_pag = date_picker_br(
-        page,
-        label="Data do pagamento (Opcional)"
+    page,
+    label="Data do pagamento"
+)
+
+    dt_pagamento_container = ft.Column(
+        controls=[dt_pagamento_field],
+        visible=False,
     )
 
     dt_vencimento_field, date_picker_venc = date_picker_br(
@@ -506,6 +518,7 @@ def transacao_cadastrar_page(page: ft.Page):
     pago_field = ft.Checkbox(
         label="Pago", 
         value=False,
+        on_change=on_pago_change
     )
 
     mensagem = ft.Text()
@@ -698,7 +711,7 @@ def transacao_cadastrar_page(page: ft.Page):
                                                 alignment=ft.alignment.center_left,
                                                 content=pago_field
                                             ),
-                                            dt_pagamento_field,
+                                            dt_pagamento_container,
                                             observacao_field,
                                             ft.ElevatedButton(
                                                 text="Salvar Transação",
@@ -790,6 +803,14 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             dt_fim_recorrencia_field_container.visible = False
         else:
             dt_fim_recorrencia_field_container.visible = True
+        page.update()
+    
+    def on_pago_change(e):
+        dt_pagamento_container.visible = pago_field.value
+
+        if not pago_field.value:
+            date_picker_pag.value = ""
+
         page.update()
 
 
@@ -917,8 +938,13 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
 
     dt_pagamento_field, date_picker_pag = date_picker_br(
         page,
-        label="Data do pagamento (Opcional)",
+        label="Data do pagamento",
         value=transacao.transacao_dt_pagamento
+    )
+
+    dt_pagamento_container = ft.Column(
+        controls=[dt_pagamento_field],
+        visible=transacao.transacao_pago
     )
 
     dt_vencimento_field, date_picker_venc = date_picker_br(
@@ -947,8 +973,9 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
     )
 
     pago_field = ft.Checkbox(
-        label="Pago", 
-        value=transacao.transacao_pago
+        label="Pago",
+        value=transacao.transacao_pago,
+        on_change=on_pago_change
     )
 
     mensagem = ft.Text()
@@ -1151,7 +1178,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
                                                 alignment=ft.alignment.center_left,
                                                 content=pago_field
                                             ),
-                                            dt_pagamento_field,
+                                            dt_pagamento_container,
                                             observacao_field,
                                             ft.Row(
                                                 [
