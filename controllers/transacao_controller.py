@@ -173,3 +173,14 @@ class TransacaoController:
     # --------------------------------------------------------
     def delete_transacao(self, transacao_id):
         return self.service.delete_transacao(transacao_id)
+    
+    # --------------------------------------------------------
+    # Listar transações por mês e ano
+    # --------------------------------------------------------
+    def listar_transacoes_por_mes(self, usuario_id: int, ano: int, mes: int):
+        sucesso, resultado = self.service.listar_transacoes_por_mes(usuario_id, ano, mes)
+        if sucesso:
+            return resultado
+        else:
+            logging.error(resultado)
+            return []

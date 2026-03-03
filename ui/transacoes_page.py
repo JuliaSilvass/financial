@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import flet as ft
 from services.session_manager import SessionManager
 from controllers.transacao_controller import TransacaoController
@@ -39,8 +41,10 @@ def transacao_listar_page(page: ft.Page):
     controller = TransacaoController()
 
     sidebar = transacao_sidebar(page, user, "/transacao/listar")
+    mes_atual = datetime.now().month
+    ano_atual = datetime.now().year
 
-    transacoes = controller.listar_transacoes(user["id"])
+    transacoes = controller.listar_transacoes_por_mes(user["id"], ano_atual, mes_atual)
     for tra in transacoes:
         tra.ambiente_nome = tra.ambiente.ambiente_nome if tra.ambiente else "-"
         tra.categoria_nome = tra.categoria.categoria_nome if tra.categoria else "-"
@@ -131,6 +135,79 @@ def transacao_listar_page(page: ft.Page):
     def on_click(tra):
         page.go(f"/transacao/detalhar/{tra.transacao_id}")
 
+    # -------------------------
+    # Dropdowns de mês e ano
+    # -------------------------
+
+    meses = [
+        ("1", "Janeiro"),
+        ("2", "Fevereiro"),
+        ("3", "Março"),
+        ("4", "Abril"),
+        ("5", "Maio"),
+        ("6", "Junho"),
+        ("7", "Julho"),
+        ("8", "Agosto"),
+        ("9", "Setembro"),
+        ("10", "Outubro"),
+        ("11", "Novembro"),
+        ("12", "Dezembro"),
+    ]
+
+    anos = [str(a) for a in range(2020, datetime.now().year + 10)]
+
+    mes_dropdown = ft.Dropdown(
+        label="Mês",
+        width=170,
+        value=str(mes_atual),
+        options=[ft.dropdown.Option(m[0], m[1]) for m in meses],
+    )
+
+    ano_dropdown = ft.Dropdown(
+        label="Ano",
+        width=150,
+        value=str(ano_atual),
+        options=[ft.dropdown.Option(a) for a in anos],
+    )
+
+    def atualizar_tela(e=None):
+        nonlocal transacoes
+
+        mes = int(mes_dropdown.value)
+        ano = int(ano_dropdown.value)
+
+        novas = controller.listar_transacoes_por_mes(user["id"], ano, mes)
+
+        for tra in novas:
+            tra.ambiente_nome = tra.ambiente.ambiente_nome if tra.ambiente else "-"
+            tra.categoria_nome = tra.categoria.categoria_nome if tra.categoria else "-"
+
+        nova_tabela = build_list_page(
+            items=novas,
+            columns=columns,
+            on_item_click=on_click,
+            search_bar=search_bar,
+        )
+
+        tabela.controls.clear()
+        tabela.controls.extend(nova_tabela.controls)
+
+        page.update()
+
+    mes_dropdown.on_change = atualizar_tela
+    ano_dropdown.on_change = atualizar_tela
+
+    mes_text = ft.Text(f"{mes_atual:02d}/{ano_atual}", size=20, weight="bold")
+
+    navegacao_mes = ft.Row(
+        [
+            mes_dropdown,
+            ano_dropdown,
+        ],
+        spacing=20,
+        alignment=ft.MainAxisAlignment.CENTER,
+    )
+
     # --------------------------------------------------
     # Tabela (variável que será atualizada)
     # --------------------------------------------------
@@ -213,8 +290,10 @@ def transacao_listar_page(page: ft.Page):
                                             "Transações Cadastradas", 
                                             size=26, 
                                             weight="bold", 
-                                        )
-                                    ]
+                                        ),
+                                        navegacao_mes,
+                                    ],
+                                    # alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 ),
                                 ft.Divider(),
                                 tabela

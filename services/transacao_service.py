@@ -1,4 +1,6 @@
 #services/transacao_service.py
+from sqlalchemy import extract
+
 from models.transacao import Transacao
 from models.ambiente import Ambiente
 from sqlalchemy.orm import Session, joinedload
@@ -40,6 +42,38 @@ class TransacaoService:
             self.db.rollback()
             logging.error(f"Erro ao criar transação: {e}")
             return False, f"Erro ao criar transação: {str(e)}"
+        finally:
+            self.db.close()
+
+    # --------------------------------------------------------
+    # Listar transações por mês e ano
+    # --------------------------------------------------------
+
+    def listar_transacoes_por_mes(self, usuario_id: int, ano: int, mes: int):
+        try:
+            transacoes = (
+                self.db.query(Transacao)
+                .options(
+                    joinedload(Transacao.ambiente),
+                    joinedload(Transacao.categoria),
+                    joinedload(Transacao.conta),
+                )
+                .join(Transacao.ambiente)
+                .filter(
+                    Ambiente.usuario_id == usuario_id,
+                    extract("year", Transacao.transacao_data) == ano,
+                    extract("month", Transacao.transacao_data) == mes,
+                )
+                .order_by(Transacao.transacao_data.desc())
+                .all()
+            )
+
+            return True, transacoes
+
+        except Exception as e:
+            logging.error(f"Erro ao listar transações por mês: {e}")
+            return False, str(e)
+
         finally:
             self.db.close()
 
