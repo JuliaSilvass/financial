@@ -6,6 +6,7 @@ from models.ambiente import Ambiente
 from sqlalchemy.orm import Session, joinedload
 from database.connection_db import SessionLocal
 from datetime import date
+from decimal import Decimal
 import logging
 
 class TransacaoService:
@@ -33,6 +34,7 @@ class TransacaoService:
             if not conta:
                 return False, "Conta não encontrada."
             
+            valor = Decimal(str(valor))
             if tipo == "receita":
                 novo_saldo = conta.conta_saldo_limite_disponivel + valor
             else:
@@ -222,6 +224,24 @@ class TransacaoService:
             )
             if not transacao:
                 return False, "Transação não encontrada."
+
+            conta = (
+                self.db.query(Conta)
+                .filter(Conta.conta_id == transacao.conta_id)
+                .first()
+            )
+
+            if not conta:
+                return False, "Conta não encontrada."
+
+            valor = Decimal(str(transacao.transacao_valor))
+
+            if transacao.transacao_tipo == "receita":
+                novo_saldo = conta.conta_saldo_limite_disponivel - valor
+            else:
+                novo_saldo = conta.conta_saldo_limite_disponivel + valor
+
+            conta.conta_saldo_limite_disponivel = novo_saldo
 
             self.db.delete(transacao)
             self.db.commit()
