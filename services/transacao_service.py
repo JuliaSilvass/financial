@@ -1,6 +1,6 @@
 #services/transacao_service.py
 from sqlalchemy import extract
-
+from models.conta import Conta
 from models.transacao import Transacao
 from models.ambiente import Ambiente
 from sqlalchemy.orm import Session, joinedload
@@ -25,6 +25,24 @@ class TransacaoService:
                                 tipo_recorrencia: str = None, dt_fim_recorrencia: date = None, dt_pagamento: date = None,
                                 dt_vencimento: date = None, total_parcelas: int = 1, parcela_atual: int = 1):
         try:
+
+            conta = self.db.query(Conta).filter(
+                Conta.conta_id == conta_id
+            ).first()
+
+            if not conta:
+                return False, "Conta não encontrada."
+            
+            if tipo == "receita":
+                novo_saldo = conta.conta_saldo_limite_disponivel + valor
+            else:
+                novo_saldo = conta.conta_saldo_limite_disponivel - valor
+
+            if conta.conta_tipo == "Poupança" and novo_saldo < 0:
+                return False, "Conta poupança não pode ficar negativa."
+            
+            conta.conta_saldo_limite_disponivel = novo_saldo
+
             nova_transacao = Transacao(
                 descricao=descricao, valor=valor, data=data, ambiente_id=ambiente_id, 
                 categoria_id=categoria_id, conta_id=conta_id, tipo=tipo, modo=modo, pago=pago, 
