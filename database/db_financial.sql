@@ -56,6 +56,8 @@ CREATE TABLE conta (
     conta_tipo VARCHAR(50) NOT NULL CHECK (conta_tipo IN ('Corrente', 'Poupança', 'Investimento', 'Cartão de Crédito', 'Carteira', 'Outros')),
     conta_saldo_limite_inicial NUMERIC(12,2) DEFAULT 0,
     conta_saldo_limite_disponivel NUMERIC(12,2) DEFAULT 0,
+    conta_dia_fechamento INTEGER CHECK (conta_dia_fechamento BETWEEN 1 AND 31),
+    conta_dia_vencimento INTEGER CHECK (conta_dia_vencimento BETWEEN 1 AND 31),
     conta_dt_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     conta_ativo BOOLEAN DEFAULT TRUE,
     usuario_id INTEGER NOT NULL REFERENCES usuario(usuario_id) ON DELETE CASCADE

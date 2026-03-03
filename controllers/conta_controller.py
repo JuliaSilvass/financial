@@ -5,12 +5,34 @@ class ContaController:
     def __init__(self):
         self.service = ContaService()
 
-    def register_conta(self, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo, usuario_id):
+    def register_conta(
+                    self, 
+                    nome, 
+                    tipo, 
+                    saldo_inicial, 
+                    saldo_disponivel, 
+                    conta_ativo, 
+                    usuario_id,     
+                    dia_fechamento,
+                    dia_vencimento):
         
         if tipo == "Poupança" and (saldo_inicial < 0 or saldo_disponivel < 0):
             mensagem = "Saldo inicial/disponível para conta Poupança não pode ser negativo."
             logging.error(f"Erro ao cadastrar conta: {mensagem}")
             return False, mensagem
+        
+        if tipo == "Cartão de Crédito":
+            if not dia_fechamento or not dia_vencimento:
+                return False, "Cartão de crédito precisa de dia de fechamento e vencimento."
+
+            if not (1 <= int(dia_fechamento) <= 31):
+                return False, "Dia de fechamento inválido."
+
+            if not (1 <= int(dia_vencimento) <= 31):
+                return False, "Dia de vencimento inválido."
+        else:
+            dia_fechamento = None
+            dia_vencimento = None
         
         """
         Cadastra uma nova conta financeiro.
@@ -21,7 +43,9 @@ class ContaController:
             saldo_inicial=saldo_inicial,
             saldo_disponivel=saldo_disponivel,
             conta_ativo=conta_ativo,
-            usuario_id=usuario_id
+            usuario_id=usuario_id,
+            dia_fechamento=dia_fechamento,
+            dia_vencimento=dia_vencimento
         )
 
         if sucesso:
@@ -39,17 +63,39 @@ class ContaController:
             logging.error(resultado)
             return []
 
-    def update_conta(self, conta_id, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo):
+    def update_conta(
+            self, 
+            conta_id, 
+            nome, tipo, 
+            saldo_inicial, 
+            saldo_disponivel, 
+            conta_ativo,
+            dia_fechamento,
+            dia_vencimento
+            ):
         
         if tipo == "Poupança" and saldo_inicial < 0 and saldo_disponivel < 0:
             mensagem = "Saldo inicial/disponível para conta Poupança não pode ser negativo."
             logging.error(f"Erro ao cadastrar conta: {mensagem}")
             return False, mensagem
         
+        if tipo == "Cartão de Crédito":
+            if not dia_fechamento or not dia_vencimento:
+                return False, "Cartão de crédito precisa de dia de fechamento e vencimento."
+
+            if not (1 <= int(dia_fechamento) <= 31):
+                return False, "Dia de fechamento inválido."
+
+            if not (1 <= int(dia_vencimento) <= 31):
+                return False, "Dia de vencimento inválido."
+        else:
+            dia_fechamento = None
+            dia_vencimento = None
+        
         """
         Atualiza uma conta existente.
         """
-        return self.service.update_conta(conta_id, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo)
+        return self.service.update_conta(conta_id, nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo, dia_fechamento, dia_vencimento)
 
 
     def get_conta(self, conta_id):

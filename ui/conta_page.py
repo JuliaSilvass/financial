@@ -173,6 +173,16 @@ def conta_cadastrar_page(page: ft.Page):
 
         page.update()
 
+    def on_tipo_change(e):
+        if tipo_field.value == "Cartão de Crédito":
+            cartao_container.visible = True
+        else:
+            cartao_container.visible = False
+            dia_fechamento_field.value = None
+            dia_vencimento_field.value = None
+
+        page.update()
+
     nome_field = ft.TextField(
         label="Nome da Conta", 
         width=400,
@@ -188,8 +198,32 @@ def conta_cadastrar_page(page: ft.Page):
             ft.dropdown.Option("Cartão de Crédito", "Cartão de Crédito"),
             ft.dropdown.Option("Carteira", "Carteira"),
             ft.dropdown.Option("Outros", "Outros"),
-        ]
+        ],
+        on_change=on_tipo_change
     )
+    dias_opcoes = [ft.dropdown.Option(str(i)) for i in range(1, 32)]
+
+    dia_fechamento_field = ft.Dropdown(
+        label="Dia de Fechamento",
+        width=400,
+        options=dias_opcoes
+    )
+
+    dia_vencimento_field = ft.Dropdown(
+        label="Dia de Vencimento",
+        width=400,
+        options=dias_opcoes
+    )
+
+    cartao_container = ft.Column(
+        controls=[
+            dia_fechamento_field,
+            dia_vencimento_field
+        ],
+        visible=False,
+        spacing=20
+    )
+
     saldo_inicial_field = ft.TextField(
         label="Saldo Inicial", 
         width=400,
@@ -236,6 +270,8 @@ def conta_cadastrar_page(page: ft.Page):
         saldo_inicial = to_float(saldo_inicial_field.value)
         saldo_disponivel = to_float(saldo_inicial_field.value)
         conta_ativo = ativo_field.value
+        dia_fechamento = int(dia_fechamento_field.value) if dia_fechamento_field.value else None
+        dia_vencimento = int(dia_vencimento_field.value) if dia_vencimento_field.value else None
 
         if not nome or not tipo:
             show_alert(
@@ -245,7 +281,7 @@ def conta_cadastrar_page(page: ft.Page):
             )
             return
         
-        ok, msg = controller.register_conta(nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo, user["id"])
+        ok, msg = controller.register_conta(nome, tipo, saldo_inicial, saldo_disponivel, conta_ativo, user["id"], dia_fechamento, dia_vencimento)
 
         if ok:
             page.go("/conta/listar")
@@ -295,6 +331,7 @@ def conta_cadastrar_page(page: ft.Page):
                                 ft.Divider(),
                                 nome_field,
                                 tipo_field,
+                                cartao_container,
                                 saldo_inicial_field,
                                 saldo_disponivel_field,
                                 ativo_container,
@@ -338,6 +375,16 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
     
     sidebar = conta_sidebar(page, user, "/conta/listar")
 
+    def on_tipo_change(e):
+        if tipo_field.value == "Cartão de Crédito":
+            cartao_container.visible = True
+        else:
+            cartao_container.visible = False
+            dia_fechamento_field.value = None
+            dia_vencimento_field.value = None
+
+        page.update()
+
     nome_field = ft.TextField(
         label="Nome da Conta", 
         width=400, 
@@ -354,8 +401,32 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
             ft.dropdown.Option("Cartão de Crédito", "Cartão de Crédito"),
             ft.dropdown.Option("Carteira", "Carteira"),
             ft.dropdown.Option("Outros", "Outros"),
-        ]
+        ],
+        on_change=on_tipo_change
     )
+
+    dias_opcoes = [ft.dropdown.Option(str(i)) for i in range(1, 32)]
+
+    dia_fechamento_field = ft.Dropdown(
+        label="Dia de Fechamento",
+        width=400,
+        options=dias_opcoes,
+        value=str(conta.conta_dia_fechamento) if conta.conta_dia_fechamento else None
+    )
+
+    dia_vencimento_field = ft.Dropdown(
+        label="Dia de Vencimento",
+        width=400,
+        options=dias_opcoes,
+        value=str(conta.conta_dia_vencimento) if conta.conta_dia_vencimento else None
+    )
+
+    cartao_container = ft.Column(
+        controls=[dia_fechamento_field, dia_vencimento_field],
+        visible=(conta.conta_tipo == "Cartão de Crédito"),
+        spacing=20
+    )
+
     saldo_inicial_field = ft.TextField(
         label="Saldo Inicial", 
         width=400, 
@@ -401,6 +472,8 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
         saldo_inicial = to_float(saldo_inicial_field.value)
         saldo_disponivel = to_float(saldo_disponivel_field.value)
         ativo = ativo_field.value
+        dia_fechamento = int(dia_fechamento_field.value) if dia_fechamento_field.value else None
+        dia_vencimento = int(dia_vencimento_field.value) if dia_vencimento_field.value else None
 
         if not nome or not tipo:
                 show_alert(
@@ -410,7 +483,7 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
                 )
                 return
 
-        ok, msg = controller.update_conta(conta_id, nome, tipo, saldo_inicial, saldo_disponivel, ativo)
+        ok, msg = controller.update_conta(conta_id, nome, tipo, saldo_inicial, saldo_disponivel, ativo, dia_fechamento, dia_vencimento)
         
         if ok: 
             show_alert(page, "Sucesso", msg)
@@ -470,6 +543,7 @@ def conta_detalhar_page(page: ft.Page, conta_id: int):
                                 ft.Divider(),
                                 nome_field,
                                 tipo_field,
+                                cartao_container,
                                 saldo_inicial_field,
                                 saldo_disponivel_field,
                                 ativo_container,

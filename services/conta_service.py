@@ -10,7 +10,15 @@ class ContaService:
         self.db: Session = SessionLocal()
     
     # Aqui o método para criar conta
-    def create_conta(self, nome: str, tipo: str, saldo_inicial:float, saldo_disponivel: float, conta_ativo:bool, usuario_id: int):
+    def create_conta(self, 
+                    nome: str, 
+                    tipo: str, 
+                    saldo_inicial:float, 
+                    saldo_disponivel: float, 
+                    conta_ativo:bool, 
+                    usuario_id: int, 
+                    dia_fechamento: int,
+                    dia_vencimento: int):
         try:
             nova_conta = Conta(
                 nome=nome,
@@ -18,7 +26,9 @@ class ContaService:
                 saldo_inicial=saldo_inicial,
                 saldo_disponivel=saldo_disponivel,
                 ativo=conta_ativo,  
-                usuario_id=usuario_id
+                usuario_id=usuario_id,
+                dia_fechamento=dia_fechamento,
+                dia_vencimento=dia_vencimento
             )
             self.db.add(nova_conta)
             self.db.commit()
@@ -61,12 +71,22 @@ class ContaService:
             self.db.close()
 
     # altera conta  
-    def update_conta(self, conta_id: int, nome: str, tipo: str, saldo_inicial: float, saldo_disponivel: float, conta_ativo:bool):
+    def update_conta(
+            self, 
+            conta_id: int, 
+            nome: str, 
+            tipo: str, 
+            saldo_inicial: float, 
+            saldo_disponivel: float, 
+            conta_ativo:bool,
+            dia_fechamento: int,
+            dia_vencimento: int):
         try:
             conta = self.db.query(Conta).filter(Conta.conta_id == conta_id).first()
             if not conta:
                 return False, "Conta não encontrada."
-
+            conta.conta_dia_fechamento = dia_fechamento
+            conta.conta_dia_vencimento = dia_vencimento
             conta.conta_nome = nome
             conta.conta_tipo = tipo
             conta.conta_saldo_limite_inicial = saldo_inicial
