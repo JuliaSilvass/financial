@@ -329,7 +329,7 @@ def transacao_cadastrar_page(page: ft.Page):
     # metas = metaController.listar_meta(user["id"])
 
     contas_map = {
-        str(ct.conta_id): ct.conta_tipo
+        str(ct.conta_id): ct
         for ct in contas
     }
 
@@ -341,12 +341,31 @@ def transacao_cadastrar_page(page: ft.Page):
             page.update()
             return
 
-        tipo_conta = contas_map.get(conta_id)
+        conta = contas_map.get(conta_id)
 
-        if tipo_conta == "Cartão de Crédito":
+        if not conta:
+            return
+
+        if conta.conta_tipo == "Cartão de Crédito":
             cartao_credito_container.visible = True
+
+            if conta.conta_dia_vencimento:
+                hoje = datetime.now()
+                ano = hoje.year
+                mes = hoje.month
+
+                try:
+                    data_venc = datetime(ano, mes, int(conta.conta_dia_vencimento))
+                except ValueError:
+                    from calendar import monthrange
+                    ultimo_dia = monthrange(ano, mes)[1]
+                    data_venc = datetime(ano, mes, ultimo_dia)
+
+                date_picker_venc.value = data_venc.strftime("%d/%m/%Y")
+
         else:
             cartao_credito_container.visible = False
+            date_picker_venc.value = ""
 
         page.update()
 
@@ -769,7 +788,7 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
     # --- Campos editáveis ---
 
     contas_map = {
-        str(ct.conta_id): ct.conta_tipo
+        str(ct.conta_id): ct
         for ct in contas
     }
 
@@ -781,12 +800,31 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             page.update()
             return
 
-        tipo_conta = contas_map.get(conta_id)
+        conta = contas_map.get(conta_id)
 
-        if tipo_conta == "Cartão de Crédito":
+        if not conta:
+            return
+
+        if conta.conta_tipo == "Cartão de Crédito":
             cartao_credito_container.visible = True
+
+            if conta.conta_dia_vencimento:
+                hoje = datetime.now()
+                ano = hoje.year
+                mes = hoje.month
+
+                try:
+                    data_venc = datetime(ano, mes, int(conta.conta_dia_vencimento))
+                except ValueError:
+                    from calendar import monthrange
+                    ultimo_dia = monthrange(ano, mes)[1]
+                    data_venc = datetime(ano, mes, ultimo_dia)
+
+                date_picker_venc.value = data_venc.strftime("%d/%m/%Y")
+
         else:
             cartao_credito_container.visible = False
+            date_picker_venc.value = ""
 
         page.update()
 
@@ -1102,8 +1140,8 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
             dt_fim_recorrencia_field_container.visible = True
 
     # Cartão de crédito
-    tipo_conta = contas_map.get(str(conta_field.value))
-    if tipo_conta == "Cartão de Crédito":
+    conta_inicial = contas_map.get(str(conta_field.value))
+    if conta_inicial and conta_inicial.conta_tipo == "Cartão de Crédito":
         cartao_credito_container.visible = True
 
     # --- VIEW FINAL ---
