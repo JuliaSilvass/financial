@@ -23,6 +23,11 @@ from ui.transacoes_page import (
     transacao_cadastrar_page,
     transacao_detalhar_page
 )
+from ui.meta_page import (
+    meta_listar_page,
+    meta_cadastrar_page,
+    meta_detalhar_page
+)
 from database.connection_db import test_connection
 
 
@@ -95,6 +100,18 @@ def main(page: ft.Page):
                 page.go("/transacao/listar")
             page.update()
             return
+        
+        #Rota dinâmica: /meta/detalhar/{id}
+        if route.startswith("/meta/detalhar/"):
+            try:
+                meta_id = int(route.split("/")[-1])
+                page.views.append(meta_detalhar_page(page, meta_id))
+            except ValueError:
+                page.snack_bar = ft.SnackBar(ft.Text("ID inválido para meta."))
+                page.snack_bar.open = True
+                page.go("/meta/listar")
+            page.update()
+            return
 
 
         # Demais rotas fixas
@@ -111,6 +128,8 @@ def main(page: ft.Page):
             "/conta/listar": conta_listar_page,
             "/transacao/cadastrar": transacao_cadastrar_page,
             "/transacao/listar": transacao_listar_page,
+            "/meta/cadastrar": meta_cadastrar_page,
+            "/meta/listar": meta_listar_page,
         }
 
         # Se a rota existir, renderiza a página correspondente
