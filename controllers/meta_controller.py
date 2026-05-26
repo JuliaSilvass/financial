@@ -1,7 +1,9 @@
+
 import logging
 from services.meta_service import MetaService
 from models.meta import Meta
 from services.session_manager import SessionManager
+from services.meta_analysis_service import MetaAnalysisService
 
 
 class MetaController:
@@ -66,11 +68,15 @@ class MetaController:
     # --------------------------------------------------------
     def listar_metas(self, usuario_id):
         sucesso, resultado = self.service.listar_meta_por_usuario(usuario_id)
-        if sucesso:
-            return resultado
-        else:
+
+        if not sucesso:
             logging.error(resultado)
             return []
+        
+        for meta in resultado:
+            meta.progresso_valor = MetaAnalysisService.calcular_progresso_valor(meta)
+            meta.progresso_tempo = MetaAnalysisService.calcular_progresso_tempo(meta)
+        return resultado
 
     # --------------------------------------------------------
     # Buscar meta por ID

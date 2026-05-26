@@ -81,11 +81,11 @@ def meta_listar_page(page: ft.Page):
             "field": "meta_valor_atual",
             "width": 150,
         },
-        # {
-        #     "label": "Progresso", 
-        #     "field": "meta_concluida",
-        #     "width": 150,
-        # },
+        {
+            "label": "Progresso", 
+            "field": "progresso_valor",
+            "width": 120,
+        },
         {
             "label": "Status", 
             "field": "meta_concluida",
