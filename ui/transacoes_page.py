@@ -13,6 +13,10 @@ from utils.search_bar import build_search_bar
 from utils.replace import to_float
 from utils.date import date_picker_br
 
+
+from services.importacao_service import ImportacaoService
+
+
 # ==========================================================
 # Sidebar 
 # ==========================================================
@@ -20,6 +24,7 @@ def transacao_sidebar(page, user, active_route: str):
     menu_items = [
         {"label": "Listar Transações", "route": "/transacao/listar", "icon": ft.Icons.LIST},
         {"label": "Cadastrar Nova", "route": "/transacao/cadastrar", "icon": ft.Icons.ADD},
+        {"label": "Importar Transações", "route": "/transacao/importar", "icon": ft.Icons.UPLOAD_FILE},
     ]
     return build_sidebar(
         page=page,
@@ -1246,4 +1251,378 @@ def transacao_detalhar_page(page: ft.Page, transacao_id: int):
                 ],
             ),
         ],
+    )
+
+
+# --------------------------------------------------------------------
+# Página de IMPORTAR TRANSACOES
+# --------------------------------------------------------------------
+def transacao_importar_page(page: ft.Page):
+    if not SessionManager.is_logged_in():
+        page.go("/login")
+        return ft.View(route="/transacao/importar", controls=[])
+
+    user = SessionManager.get_current_user()
+
+    contaController = ContaController()
+
+    contas = contaController.listar_conta(user["id"])
+
+    sidebar = transacao_sidebar(page, user, "/transacao/importar")
+
+    contas_map = {
+        str(ct.conta_id): ct
+        for ct in contas
+    }
+
+    # ==========================================================
+    # CAMPOS
+    # ==========================================================
+
+    conta_field = ft.Dropdown(
+        label="Conta para importação",
+        width=450,
+        options=[
+            ft.dropdown.Option(
+                str(ct.conta_id),
+                ct.conta_nome
+            )
+            for ct in contas
+        ]
+    )
+
+    banco_field = ft.Dropdown(
+        label="Banco",
+        width=450,
+        options=[
+            ft.dropdown.Option("nubank", "Nubank"),
+            ft.dropdown.Option("itau", "Itaú Unibanco"),
+            ft.dropdown.Option("bradesco", "Bradesco"),
+            ft.dropdown.Option("santander", "Santander"),
+            ft.dropdown.Option("bb", "Banco do Brasil"),
+            ft.dropdown.Option("caixa", "Caixa Econômica Federal"),
+            ft.dropdown.Option("picpay", "PicPay"),
+            ft.dropdown.Option("banrisul", "Banrisul"),
+        ]
+    )
+
+    tipo_importacao_text = ft.Text(
+        "",
+        size=14,
+        weight="bold",
+        color="#555555"
+    )
+
+    # ==========================================================
+    # FATURA
+    # ==========================================================
+
+    meses = [
+        ("1", "Janeiro"),
+        ("2", "Fevereiro"),
+        ("3", "Março"),
+        ("4", "Abril"),
+        ("5", "Maio"),
+        ("6", "Junho"),
+        ("7", "Julho"),
+        ("8", "Agosto"),
+        ("9", "Setembro"),
+        ("10", "Outubro"),
+        ("11", "Novembro"),
+        ("12", "Dezembro"),
+    ]
+
+    ano_atual = datetime.now().year
+    mes_atual = datetime.now().month
+
+    anos = [str(a) for a in range(2020, ano_atual + 10)]
+
+    fatura_mes_field = ft.Dropdown(
+        label="Mês da Fatura",
+        width=215,
+        value=str(mes_atual),
+        options=[
+            ft.dropdown.Option(m[0], m[1])
+            for m in meses
+        ]
+    )
+
+    fatura_ano_field = ft.Dropdown(
+        label="Ano da Fatura",
+        width=215,
+        value=str(ano_atual),
+        options=[
+            ft.dropdown.Option(a)
+            for a in anos
+        ]
+    )
+
+    fatura_container = ft.Row(
+        controls=[
+            fatura_mes_field,
+            fatura_ano_field
+        ],
+        spacing=20,
+        visible=False
+    )
+
+    arquivo_field = ft.TextField(
+        label="Arquivo selecionado",
+        width=450,
+        read_only=True
+    )
+
+    mensagem = ft.Text()
+
+    selected_file = {
+        "path": None,
+        "name": None
+    }
+
+    # ==========================================================
+    # FILE PICKER
+    # ==========================================================
+
+    def on_file_result(e: ft.FilePickerResultEvent):
+        if not e.files:
+            return
+
+        arquivo = e.files[0]
+
+        nome_arquivo = arquivo.name.lower()
+
+        # ======================================================
+        # VALIDAÇÃO CSV
+        # ======================================================
+
+        if not nome_arquivo.endswith(".csv"):
+            show_alert(
+                page,
+                "Arquivo inválido",
+                "No momento apenas arquivos CSV são suportados."
+            )
+            return
+
+        selected_file["path"] = arquivo.path
+        selected_file["name"] = arquivo.name
+
+        arquivo_field.value = arquivo.name
+
+        page.update()
+
+    file_picker = ft.FilePicker(
+        on_result=on_file_result
+    )
+
+    page.overlay.append(file_picker)
+
+    # ==========================================================
+    # ALTERAÇÃO DE CONTA
+    # ==========================================================
+
+    def on_conta_change(e):
+        conta_id = conta_field.value
+
+        if not conta_id:
+            tipo_importacao_text.value = ""
+            page.update()
+            return
+
+        conta = contas_map.get(conta_id)
+
+        if not conta:
+            return
+
+        # ======================================================
+        # VERIFICA SE É CARTÃO
+        # ======================================================
+
+        if conta.conta_tipo == "Cartão de Crédito":
+
+            fatura_container.visible = True
+
+            tipo_importacao_text.value = (
+                "Importação identificada como FATURA de cartão."
+            )
+
+        else:
+
+            fatura_container.visible = False
+
+            tipo_importacao_text.value = (
+                "Importação identificada como EXTRATO bancário."
+            )
+
+        page.update()
+
+    conta_field.on_change = on_conta_change
+
+    # ==========================================================
+    # IMPORTAR
+    # ==========================================================
+
+    def importar_click(e):
+
+        conta_id = conta_field.value
+        banco = banco_field.value
+
+        fatura_mes = fatura_mes_field.value
+        fatura_ano = fatura_ano_field.value
+
+        if not conta_id:
+            show_alert(
+                page,
+                "Conta obrigatória",
+                "Selecione uma conta para importar."
+            )
+            return
+
+        if not banco:
+            show_alert(
+                page,
+                "Banco obrigatório",
+                "Selecione o banco."
+            )
+            return
+
+        if not selected_file["path"]:
+            show_alert(
+                page,
+                "Arquivo obrigatório",
+                "Selecione um arquivo CSV."
+            )
+            return
+
+        conta = contas_map.get(conta_id)
+
+        if not conta:
+            show_alert(
+                page,
+                "Conta inválida",
+                "Conta não encontrada."
+            )
+            return
+
+        # ======================================================
+        # TIPO IMPORTAÇÃO
+        # ======================================================
+
+        tipo_importacao = (
+            "fatura"
+            if conta.conta_tipo == "Cartão de Crédito"
+            else "extrato"
+        )
+
+        # ======================================================
+        # AQUI VAI CHAMAR O SERVICE
+        # ======================================================
+
+        ok, msg = ImportacaoService.importar(
+            banco=banco,
+            tipo_importacao=tipo_importacao,
+            arquivo=selected_file["path"],
+            conta_id=int(conta_id),
+            usuario_id=user["id"],
+            fatura_mes=fatura_mes,
+            fatura_ano=fatura_ano
+        )
+
+        if ok:
+
+            show_alert(
+                page,
+                "Importação concluída",
+                msg
+            )
+
+        else:
+
+            show_alert(
+                page,
+                "Erro na importação",
+                msg
+            )
+
+    def voltar_click(e):
+        page.go("/transacao/listar")
+
+    # ==========================================================
+    # VIEW
+    # ==========================================================
+
+    return ft.View(
+        route="/transacao/importar",
+        padding=20,
+        bgcolor="#F5F5F5",
+        controls=[
+            ft.Row(
+                expand=True,
+                spacing=20,
+                controls=[
+                    sidebar,
+
+                    ft.Container(
+                        expand=True,
+                        padding=ft.padding.all(40),
+                        bgcolor="#FAFAFA",
+                        border_radius=10,
+                        shadow=ft.BoxShadow(
+                            blur_radius=8,
+                            color="#E0E0E0"
+                        ),
+
+                        content=ft.Column(
+                            spacing=25,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+
+                                ft.Row(
+                                    [
+                                        ft.IconButton(
+                                            icon=ft.Icons.ARROW_BACK,
+                                            tooltip="Voltar",
+                                            on_click=voltar_click
+                                        ),
+
+                                        ft.Text(
+                                            "Importar Transações",
+                                            size=26,
+                                            weight="bold"
+                                        )
+                                    ]
+                                ),
+
+                                ft.Divider(),
+
+                                conta_field,
+                                banco_field,
+                                tipo_importacao_text,
+                                fatura_container,
+                                arquivo_field,
+
+                                ft.ElevatedButton(
+                                    text="Selecionar Arquivo CSV",
+                                    icon=ft.Icons.UPLOAD_FILE,
+                                    on_click=lambda _: (
+                                        file_picker.pick_files(
+                                            allow_multiple=False
+                                        )
+                                    )
+                                ),
+
+                                ft.ElevatedButton(
+                                    text="Importar Transações",
+                                    icon=ft.Icons.SAVE,
+                                    bgcolor="#44CFA1",
+                                    color="white",
+                                    on_click=importar_click
+                                ),
+
+                                mensagem
+                            ]
+                        )
+                    )
+                ]
+            )
+        ]
     )

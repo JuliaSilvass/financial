@@ -21,7 +21,8 @@ from ui.conta_page import (
 from ui.transacoes_page import (
     transacao_listar_page, 
     transacao_cadastrar_page,
-    transacao_detalhar_page
+    transacao_detalhar_page,
+    transacao_importar_page
 )
 from ui.meta_page import (
     meta_listar_page,
@@ -128,6 +129,7 @@ def main(page: ft.Page):
             "/conta/listar": conta_listar_page,
             "/transacao/cadastrar": transacao_cadastrar_page,
             "/transacao/listar": transacao_listar_page,
+            "/transacao/importar": transacao_importar_page,
             "/meta/cadastrar": meta_cadastrar_page,
             "/meta/listar": meta_listar_page,
         }
