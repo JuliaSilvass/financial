@@ -1395,11 +1395,11 @@ def transacao_importar_page(page: ft.Page):
         # VALIDAÇÃO CSV
         # ======================================================
 
-        if not nome_arquivo.endswith(".csv"):
+        if not (nome_arquivo.endswith(".csv") or nome_arquivo.endswith(".pdf")):
             show_alert(
                 page,
                 "Arquivo inválido",
-                "No momento apenas arquivos CSV são suportados."
+                "No momento apenas arquivos CSV e PDF são suportados."
             )
             return
 
@@ -1601,7 +1601,7 @@ def transacao_importar_page(page: ft.Page):
                                 arquivo_field,
 
                                 ft.ElevatedButton(
-                                    text="Selecionar Arquivo CSV",
+                                    text="Selecionar Arquivo.",
                                     icon=ft.Icons.UPLOAD_FILE,
                                     on_click=lambda _: (
                                         file_picker.pick_files(
