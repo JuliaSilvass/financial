@@ -87,6 +87,11 @@ def meta_listar_page(page: ft.Page):
             "width": 120,
         },
         {
+            "label": "Viabilidade",
+            "field": "viabilidade",
+            "width": 150,
+        },
+        {
             "label": "Status", 
             "field": "meta_concluida",
             "width": 150

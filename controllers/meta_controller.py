@@ -73,9 +73,29 @@ class MetaController:
             logging.error(resultado)
             return []
         
+        media_poupanca = (
+            self.service.calcular_media_poupanca_mensal(
+                usuario_id
+            )
+        )
+
         for meta in resultado:
-            meta.progresso_valor = MetaAnalysisService.calcular_progresso_valor(meta)
-            meta.progresso_tempo = MetaAnalysisService.calcular_progresso_tempo(meta)
+
+            meta.progresso_valor = (
+                MetaAnalysisService.calcular_progresso_valor(meta)
+            )
+
+            meta.progresso_tempo = (
+                MetaAnalysisService.calcular_progresso_tempo(meta)
+            )
+
+            meta.viabilidade = (
+                MetaAnalysisService.calcular_viabilidade(
+                    meta,
+                    media_poupanca
+                )
+            )
+
         return resultado
 
     # --------------------------------------------------------

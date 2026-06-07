@@ -11,6 +11,8 @@ from datetime import date
 from decimal import Decimal
 import logging
 
+from sqlalchemy import func
+
 class MetaService:
 
     def __init__(self):
@@ -162,3 +164,43 @@ class MetaService:
         
         finally:
             self.db.close()
+            
+
+    def calcular_media_poupanca_mensal(
+        self,
+        usuario_id
+    ):
+
+        receitas = (
+            self.db.query(
+                func.coalesce(
+                    func.sum(Transacao.transacao_valor),
+                    0
+                )
+            )
+            .join(Conta, Conta.conta_id == Transacao.conta_id)
+            .filter(
+                Conta.usuario_id == usuario_id,
+                Transacao.transacao_tipo == "receita"
+            )
+            .scalar()
+        )
+
+        despesas = (
+            self.db.query(
+                func.coalesce(
+                    func.sum(Transacao.transacao_valor),
+                    0
+                )
+            )
+            .join(Conta, Conta.conta_id == Transacao.conta_id)
+            .filter(
+                Conta.usuario_id == usuario_id,
+                Transacao.transacao_tipo == "despesa"
+            )
+            .scalar()
+        )
+
+        saldo = float(receitas) - float(despesas)
+
+        return saldo
