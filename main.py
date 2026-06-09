@@ -29,6 +29,7 @@ from ui.meta_page import (
     meta_cadastrar_page,
     meta_detalhar_page
 )
+from ui.perfil_page import perfil_page
 from database.connection_db import test_connection
 
 
@@ -132,6 +133,7 @@ def main(page: ft.Page):
             "/transacao/importar": transacao_importar_page,
             "/meta/cadastrar": meta_cadastrar_page,
             "/meta/listar": meta_listar_page,
+            "/perfil": perfil_page
         }
 
         # Se a rota existir, renderiza a página correspondente
