@@ -3,9 +3,14 @@ from models.user import User
 import re
 from services.user_service import UserServices 
 from services.session_manager import SessionManager
+from controllers.ambiente_controller import AmbienteController
+from controllers.categoria_controller import CategoriaController
 from utils.security import hash_password, verify_password
 from utils.security import validate_password
 
+
+ambiente_controller = AmbienteController()
+categoria_controller = CategoriaController()
 
 class UserController:
     def __init__(self):
@@ -36,10 +41,13 @@ class UserController:
         
         #transforma a senha em hash
         password_hash = hash_password(password)
-        user = self.service.create_user(user, email, password_hash)
+        user, user_id = self.service.create_user(user, email, password_hash)
 
         # Cria usuario
         if user:
+            ambiente_controller.register_ambiente("Padrão", "Ambiente padrão do usuário", user_id) 
+            categoria_controller.register_categoria("Padrão", user_id)  
+
             return True, "Usuário cadastrado com sucesso."
         return False, "Erro ao cadastrar usuário."
         

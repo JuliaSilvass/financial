@@ -16,11 +16,11 @@ class UserServices:
             self.db.add(new_user)
             self.db.commit()
             self.db.refresh(new_user)
-            return True
+            return True, new_user.usuario_id
         except Exception as e:
             self.db.rollback()
             logging.error(f"Erro ao criar usuário: {e}")
-            return False
+            return False, None
         finally:
             self.db.close()
 
